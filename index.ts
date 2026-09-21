@@ -3,7 +3,7 @@ import { loadSidebarSettings, getAutoCompactEnabled, saveSidebarSettings, MIN_TO
 import type { TodoItem, SidebarContext, CtxSample } from "./types.ts";
 import { parseTodos, reconstructTodosFromBranch } from "./parse-todos.ts";
 import { renderSidebar } from "./sidebar.ts";
-import { getWorkspaceData, invalidateWorkspaceCache } from "./workspace.ts";
+import { getWorkspaceData, invalidateWorkspaceCache, onWorkspaceDataChanged } from "./workspace.ts";
 import { SidebarCompositor } from "./compositor.ts";
 import { getMcpServers, invalidateMcpCache } from "./mcp.ts";
 import { loadCavemanConfig, resolveCavemanLevel, cavemanInterval, type CavemanConfig } from "./caveman.ts";
@@ -44,6 +44,7 @@ const CTX_SAMPLE_MAX = 10;
 const TPS_WINDOW_MS = 2000;
 let sessionTimerHandle: ReturnType<typeof setInterval> | null = null;
 let unsubscribeMcpStatus: (() => void) | null = null;
+let unsubscribeWorkspace: (() => void) | null = null;
 let cavemanLevel: string | null = null;
 let cavemanFrame = 0;
 let cavemanTimer: ReturnType<typeof setInterval> | null = null;
@@ -310,6 +311,8 @@ export default function piSidebar(pi: ExtensionAPI) {
     };
     const myRender = scheduleRender;
     requestRender = myRender;
+    unsubscribeWorkspace?.();
+    unsubscribeWorkspace = onWorkspaceDataChanged(() => requestRender?.());
 
     // Keep MCP status live: the MCP adapter publishes a runtime snapshot on the
     // shared event bus whenever server state changes (enable/disable, connect,
@@ -378,6 +381,8 @@ export default function piSidebar(pi: ExtensionAPI) {
   });
 
   pi.on("session_shutdown", async () => {
+    unsubscribeWorkspace?.();
+    unsubscribeWorkspace = null;
     if (sessionTimerHandle) { clearInterval(sessionTimerHandle); sessionTimerHandle = null; }
     if (unsubscribeMcpStatus) { unsubscribeMcpStatus(); unsubscribeMcpStatus = null; }
     stopCavemanAnim();

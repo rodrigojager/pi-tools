@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.5-rodrigo.2] - 2026-09-21
+
+### Fixed
+
+- Replace synchronous shell-based Git calls during rendering with asynchronous
+  argument-based processes, bounded by time/output limits and hidden on Windows.
+- Cache workspace state per directory, retain the previous snapshot while
+  refreshing, coalesce concurrent reads and discard invalidated in-flight results.
+- Derive branch/ahead/untracked data from one porcelain status query, handle
+  unborn branches and NUL-delimited paths, and skip filesystem-root repositories.
+- Repaint after fresh workspace data arrives; unsubscribe on extension shutdown.
+
+### Added
+
+- Regression tests for responsive rendering, cache isolation, invalidation races,
+  failure handling, unusual filenames and real Git repositories.
+
 ## [1.7.5-rodrigo.1] - 2026-09-21
 
 ### Fixed

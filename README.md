@@ -2,10 +2,11 @@
 
 This is Rodrigo's compatibility fork of
 [bi0h4z4rd88/pi-sidebar-tui](https://github.com/bi0h4z4rd88/pi-sidebar-tui), based on
-upstream 1.7.4. Version **1.7.5-rodrigo.1** fixes the Pi 0.86.1 crash when switching
+upstream 1.7.4. Version **1.7.5-rodrigo.2** fixes the Pi 0.86.1 crash when switching
 between regular/fullscreen TUI mode and reloading extensions. It also keeps the
 sidebar attached to the active renderer. The original author and history are
-preserved.
+preserved. Git status is collected asynchronously so it cannot block typing or
+rendering.
 
 OpenCode-style sidebar TUI extension for [pi coding agent](https://github.com/earendil-works/pi).
 
@@ -43,6 +44,10 @@ Displays a real-time sidebar panel inside the pi terminal UI showing session met
 - Dirty file listing with diff stats (+N/-N)
 - Current working directory at bottom of sidebar
 - Auto-refreshes on write operations (write/edit/bash/computer tools)
+- Asynchronous Git queries with one refresh at a time and a separate cache per
+  directory; the previous snapshot stays visible while a refresh runs.
+- Handles repositories without commits. Repositories rooted at the filesystem
+  root (for example `C:\.git`) are ignored to avoid scanning an entire drive.
 
 ## Installation
 
