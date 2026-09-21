@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.5-rodrigo.1] - 2026-09-21
+
+### Fixed
+
+- Bind each sidebar compositor to one concrete Pi renderer, preventing recursive
+  `doRender` calls and `Maximum call stack size exceeded` after changing TUI mode
+  and reloading extensions on Pi 0.86.1.
+- Move the sidebar to the active renderer when switching regular/fullscreen mode,
+  and ignore disposal callbacks from obsolete widget instances.
+- Quote the test glob for Windows and POSIX shells.
+
+### Added
+
+- Regression coverage for renderer changes, repeated reloads, widget replacement,
+  and terminal width restoration.
+- Separate GitHub fork installation and update instructions. This fork is
+  distributed through GitHub; the original npm package is unchanged.
+
 ## [1.7.4] - 2026-09-16
 
 ### Changed

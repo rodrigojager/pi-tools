@@ -50,8 +50,12 @@ export class SidebarCompositor {
   private cacheValid = false;
 
   constructor(tui: any, getCtx: () => SidebarContext, sidebarWidth = 40) {
-    this.tui = tui;
-    this.terminal = tui.terminal;
+    // Pi 0.86 passes a proxy that follows the selected TUI mode. Its method
+    // wrappers must not be saved and restored onto a different renderer:
+    // the wrapper then resolves itself and recurses. valueOf() is bound by
+    // Pi's proxy to the concrete renderer, so this compositor owns one TUI.
+    this.tui = tui.valueOf();
+    this.terminal = this.tui.terminal;
     this.getCtx = getCtx;
     this.originalWrite = this.terminal.write.bind(this.terminal);
     this.sidebarWidth = sidebarWidth;

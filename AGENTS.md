@@ -5,7 +5,7 @@
 ## OVERVIEW
 Project: **pi-sidebar-tui**
 A **pi coding-agent extension** that renders a live right-column sidebar TUI inside the pi terminal: session metrics (model, thinking level, context usage bar, token/cost stats, `turns left` estimate), todo tracking, git workspace status, and MCP server status.
-Stack: **TypeScript (ESM, `"type":"module"`)** run via **Node native type-stripping** (`--experimental-strip-types`) — **no build step, no tsconfig, no bundler**. Deps: `@earendil-works/pi-coding-agent` + `@earendil-works/pi-tui` (both `>=0.74.0`). Tests: `node:test` + `node:assert/strict`. Node v26.
+Stack: **TypeScript (ESM, `"type":"module"`)** run via **Node native type-stripping** (`--experimental-strip-types`) — **no build step, no tsconfig, no bundler**. Peer deps: `@earendil-works/pi-coding-agent` + `@earendil-works/pi-tui` (both `>=0.74.0`); development versions are pinned to `0.86.1`. Tests: `node:test` + `node:assert/strict`. Node v26.
 
 > This is an **extension, not a standalone app**. There is no "run" command — it loads into pi and reacts to pi's event system.
 
@@ -35,10 +35,10 @@ Stack: **TypeScript (ESM, `"type":"module"`)** run via **Node native type-stripp
 | Action | Command |
 |--------|---------|
 | Install | `npm install` |
-| Test    | `npm test`  (→ `node --experimental-strip-types --test 'tests/**/*.test.ts'`) |
+| Test    | `npm test`  (→ `node --experimental-strip-types --test "tests/**/*.test.ts"`) |
 | Build   | *none* (types stripped at runtime; no compile step) |
-| Run     | *N/A* — load into pi: `pi install npm:pi-sidebar-tui` |
-| Publish | `npm login` → `npm publish` (see release workflow below) |
+| Run     | *N/A* — load into pi: `pi install https://github.com/rodrigojager/pi-sidebar-tui` |
+| Publish | Push the fork branch/tag to GitHub; do not publish to upstream npm |
 
 **In-pi controls** (once loaded): `/sidebar-tui on|off`, `/sidebar-tui width <10-120>`, `/sidebar-tui todos <N>`, `/session-title "..."`, shortcut **`Ctrl+Shift+T`** (toggle; rebind in `~/.pi/agent/keybindings.json`).
 
@@ -61,6 +61,6 @@ Stack: **TypeScript (ESM, `"type":"module"`)** run via **Node native type-stripp
 * **Context bar color** is by window-usage %: green `<50`, yellow (accent) `50–80`, red (error) `>80`. The separate `left ≈Nt` row uses pace-based color (muted/accent/warning).
 * **Reserved panel rows** (stable layout): MCP = header + 2 content, Todos = header + 7 content (`padToMin`). Panels grow past reserved only when content exceeds it; Todos caps at `todosMax` with a ` … +N more` footer.
 * **Defaults**: sidebar width `45`, `todosMax` `10`. Persisted to `~/.pi/agent/sidebar-tui.json` (corrupt/out-of-range → defaults).
-* **Release workflow**: bump `version` in `package.json` → add a `## [version] - YYYY-MM-DD` section to `CHANGELOG.md` (move `[Unreleased]` content in) → `git commit` + `git push origin main` → `npm publish`. The **lockfile root `version` is intentionally left stale** (repo convention; don't "fix" it).
+* **Fork release workflow**: bump the fork version in `package.json` → add a `## [version] - YYYY-MM-DD` section to `CHANGELOG.md` → `git commit` + push the authorized branch/tag to GitHub. `private: true` prevents accidental publication under the upstream npm name. The lockfile is ignored by repository convention.
 * **Publish `files`**: only `*.ts` + `panels/**/*.ts` are shipped (tests excluded).
-* **Shortcut mismatch**: code registers `ctrl+shift+t`; README's "Ctrl+Shift+S" note is stale.
+* **Renderer lifecycle**: `compositor.ts` owns one concrete renderer obtained through Pi's bound `valueOf()`. `index.ts` follows renderer changes in the widget and ignores obsolete disposal callbacks. Regression coverage: `tests/renderer-lifecycle.test.ts`.

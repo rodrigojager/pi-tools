@@ -1,5 +1,12 @@
 # pi-sidebar-tui
 
+This is Rodrigo's compatibility fork of
+[bi0h4z4rd88/pi-sidebar-tui](https://github.com/bi0h4z4rd88/pi-sidebar-tui), based on
+upstream 1.7.4. Version **1.7.5-rodrigo.1** fixes the Pi 0.86.1 crash when switching
+between regular/fullscreen TUI mode and reloading extensions. It also keeps the
+sidebar attached to the active renderer. The original author and history are
+preserved.
+
 OpenCode-style sidebar TUI extension for [pi coding agent](https://github.com/earendil-works/pi).
 
 Displays a real-time sidebar panel inside the pi terminal UI showing session metrics, todo tracking, workspace status, and connected MCP servers — inspired by [OpenCode](https://github.com/atanunny/opencode) sidebar.
@@ -40,10 +47,30 @@ Displays a real-time sidebar panel inside the pi terminal UI showing session met
 ## Installation
 
 ```bash
-pi install npm:pi-sidebar-tui
+pi install https://github.com/rodrigojager/pi-sidebar-tui
 ```
 
 The extension auto-registers via the `"pi"` field in `package.json`.
+
+If the npm edition is already installed, remove it before installing this fork
+so the sidebar is loaded only once:
+
+```sh
+pi remove npm:pi-sidebar-tui
+pi install https://github.com/rodrigojager/pi-sidebar-tui
+```
+
+If using a temporary local copy instead, run `pi list` and remove that copy using
+its exact source path before installing the GitHub version. Restart Pi afterward.
+
+Update this fork with:
+
+```sh
+pi update https://github.com/rodrigojager/pi-sidebar-tui
+```
+
+This release is distributed through GitHub. Installing `npm:pi-sidebar-tui`
+selects the upstream npm edition, which does not contain this fork's fix.
 
 ## Usage
 
@@ -54,7 +81,7 @@ The sidebar activates automatically when a session starts. Toggle visibility wit
 /sidebar-tui off      # Disable sidebar
 /sidebar-tui width 45 # Set sidebar width (10-120)
 
-Ctrl+Shift+S           # Toggle sidebar on/off (rebind in ~/.pi/agent/keybindings.json)
+Ctrl+Shift+T           # Toggle sidebar on/off (rebind in ~/.pi/agent/keybindings.json)
 ```
 
 Set custom session title:
@@ -112,12 +139,12 @@ npm install
 npm test
 ```
 
-## Publish on npm
+## Fork releases
 
-```bash
-npm login
-npm publish
-```
+Update `package.json` and `CHANGELOG.md`, commit, and push the GitHub branch/tag.
+The package is marked private to prevent accidentally publishing this fork under
+the upstream npm package name. Runtime loading through Pi's Git installer still
+works. The development dependencies are pinned to Pi 0.86.1 for regression checks.
 
 ## License
 

@@ -199,6 +199,7 @@ export default function piSidebar(pi: ExtensionAPI) {
   let requestRender: (() => void) | null = null;
   let tuiRef: any = null;
   let compositorRef: SidebarCompositor | null = null;
+  let activeWidget: object | null = null;
 
   const stopCavemanAnim = () => {
     if (cavemanTimer) { clearInterval(cavemanTimer); cavemanTimer = null; }
@@ -324,27 +325,48 @@ export default function piSidebar(pi: ExtensionAPI) {
 
     ui.setWidget("pi-sidebar", (tui: any, _theme: any) => {
       setPiTheme(_theme);
-      tuiRef = tui;
+      const widget = {};
+      activeWidget = widget;
+      compositorRef?.dispose();
+      compositorRef = null;
+      tuiRef = null;
 
-      if (sidebarEnabled) {
-        const comp = new SidebarCompositor(
-          tui,
-          () => buildSidebarContext(currentCwd),
-          sidebarWidth,
-        );
-        comp.install();
-        compositorRef = comp;
-      }
+      const syncRenderer = () => {
+        if (activeWidget !== widget) return;
+        const renderer = tui.valueOf();
+        if (tuiRef === renderer) return;
+        compositorRef?.dispose();
+        compositorRef = null;
+        tuiRef = renderer;
+        if (sidebarEnabled) {
+          const comp = new SidebarCompositor(
+            renderer,
+            () => buildSidebarContext(currentCwd),
+            sidebarWidth,
+          );
+          comp.install();
+          compositorRef = comp;
+          // A mode switch can be detected during a render. Repaint once with
+          // the newly installed compositor and its narrowed terminal width.
+          renderer.requestRender(true);
+        }
+      };
+      syncRenderer();
 
       return {
         dispose() {
+          if (activeWidget !== widget) return;
+          activeWidget = null;
           if (requestRender === myRender) { requestRender = null; }
           compositorRef?.dispose();
           compositorRef = null;
           tuiRef = null;
         },
         invalidate() {},
-        render(_width: number): string[] { return []; },
+        render(_width: number): string[] {
+          syncRenderer();
+          return [];
+        },
       };
     }, { placement: "belowEditor" });
   });
