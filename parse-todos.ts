@@ -17,24 +17,31 @@ export function parseTodos(input: unknown): TodoItem[] | null {
   if (!input || typeof input !== "object") return null;
 
   const obj = input as Record<string, unknown>;
-  const raw = obj["todos"] ?? obj["items"] ?? obj["list"] ?? input;
+  const raw = obj["tasks"] ?? obj["todos"] ?? obj["items"] ?? obj["list"] ?? input;
   if (!Array.isArray(raw)) return null;
 
   const result: TodoItem[] = [];
   for (const item of raw) {
     if (!item || typeof item !== "object") continue;
     const i = item as Record<string, unknown>;
+    if (i["status"] === "deleted") continue;
 
     const content =
       typeof i["content"] === "string" ? i["content"] :
-      typeof i["text"] === "string" ? i["text"] : null;
+      typeof i["text"] === "string" ? i["text"] :
+      typeof i["subject"] === "string" ? i["subject"] : null;
     if (!content) continue;
 
     result.push({
       id: normalizeId(i["id"], result.length),
       content,
       status: normalizeStatus(i),
-      subAction: typeof i["subAction"] === "string" ? i["subAction"] : undefined,
+      subAction: typeof i["subAction"] === "string" ? i["subAction"] :
+        typeof i["activeForm"] === "string" ? i["activeForm"] : undefined,
+      ...(typeof i["owner"] === "string" ? { owner: i["owner"] } : {}),
+      ...(Array.isArray(i["blockedBy"]) ? {
+        blockedBy: i["blockedBy"].filter((id): id is number => typeof id === "number" && Number.isFinite(id)).map(String),
+      } : {}),
     });
   }
   return result;

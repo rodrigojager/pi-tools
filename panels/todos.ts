@@ -1,4 +1,4 @@
-import { visibleWidth } from "@earendil-works/pi-tui";
+import { visibleWidth, truncateToWidth } from "@earendil-works/pi-tui";
 import type { SidebarContext, TodoItem, TodoStatus } from "../types.ts";
 import { dim, fg, COLORS, panelHeader, padToMin, trunc } from "../colors.ts";
 
@@ -20,6 +20,8 @@ const GLYPH_COLORS: Record<TodoStatus, string> = {
 const LEFT_PAD = 1; // gap between the sidebar's side border and the content
 
 function renderTodoLine(todo: TodoItem, width: number): string {
+  const suffix = [todo.owner, todo.blockedBy?.length ? `⛓ ${todo.blockedBy.map(id => `#${id}`).join(",")}` : ""].filter(Boolean).join(" · ");
+  const label = suffix ? `${todo.content} · ${suffix}` : todo.content;
   const leftPad = " ".repeat(LEFT_PAD);
   const glyph = fg(GLYPH_COLORS[todo.status], GLYPHS[todo.status]);
   const glyphWidth = 1; // all glyphs are 1 visible char
@@ -29,16 +31,16 @@ function renderTodoLine(todo: TodoItem, width: number): string {
   if (todo.status === "in_progress" && todo.subAction) {
     const subText = ` (${todo.subAction})`;
     const contentMax = Math.max(0, width - indent);
-    const fullText = todo.content + subText;
+    const fullText = label + subText;
     if (visibleWidth(fullText) <= contentMax) {
-      return `${leftPad}${glyph} ${todo.content}${dim(subText)}`;
+      return `${leftPad}${glyph} ${label}${dim(subText)}`;
     }
-    const contentTruncated = trunc(todo.content, Math.max(0, contentMax - 4));
+    const contentTruncated = trunc(label, Math.max(0, contentMax - 4));
     return `${leftPad}${glyph} ${contentTruncated}`;
   }
 
   const contentMax = Math.max(0, width - indent);
-  const content = trunc(todo.content, contentMax);
+  const content = trunc(label, contentMax);
   return `${leftPad}${glyph} ${content}`;
 }
 
@@ -85,5 +87,5 @@ export function renderTodosPanel(ctx: SidebarContext, width: number): string[] {
     }
   }
 
-  return [...header, ...padToMin(content, MIN_TODO_ROWS)];
+  return [...header, ...padToMin(content, MIN_TODO_ROWS)].map(line => truncateToWidth(line, width));
 }

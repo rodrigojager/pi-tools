@@ -1,6 +1,6 @@
 {
   "name": "pi-sidebar-tui",
-  "version": "1.7.5-rodrigo.2",
+  "version": "1.7.5-rodrigo.3",
   "private": true,
   "description": "Sidebar TUI extension for Pi with renderer-switch and reload compatibility fixes",
   "type": "module",
@@ -29,8 +29,8 @@
     "@earendil-works/pi-tui": ">=0.74.0"
   },
   "devDependencies": {
-    "@earendil-works/pi-coding-agent": "0.86.1",
-    "@earendil-works/pi-tui": "0.86.1"
+    "@earendil-works/pi-coding-agent": "1.0.0",
+    "@earendil-works/pi-tui": "1.0.0"
   },
   "pi": {
     "extensions": [

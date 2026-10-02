@@ -48,6 +48,18 @@ function makeCtx(overrides: Partial<SidebarContext> = {}): SidebarContext {
   };
 }
 
+test("rpiv task details render and respect narrow terminal widths", () => {
+  const ctx = makeCtx({ todos: [{ id: "2", content: "Parser", status: "in_progress", subAction: "Editing", owner: "review", blockedBy: ["1"] }] });
+  const rendered = renderTodosPanel(ctx, 80).map(strip).join("\n");
+  assert.match(rendered, /Parser/);
+  assert.match(rendered, /Editing/);
+  assert.match(rendered, /review/);
+  assert.match(rendered, /#1/);
+  for (const width of [10, 20, 45]) {
+    for (const line of renderTodosPanel(ctx, width)) assert.ok(visibleWidth(line) <= width);
+  }
+});
+
 // ─── Session panel ────────────────────────────────────────────────────────────
 
 test("session panel: no title shows placeholder", () => {

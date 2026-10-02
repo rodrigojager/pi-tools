@@ -2,7 +2,10 @@
 
 This is Rodrigo's compatibility fork of
 [bi0h4z4rd88/pi-sidebar-tui](https://github.com/bi0h4z4rd88/pi-sidebar-tui), based on
-upstream 1.7.4. Version **1.7.5-rodrigo.2** fixes the Pi 0.86.1 crash when switching
+upstream 1.7.4. Version **1.7.5-rodrigo.3** adds rpiv-todo support and preserves
+the locally installed Pi Goal integration. Changes are listed in
+[LOCAL-CHANGES.md](LOCAL-CHANGES.md) and [CHANGELOG.md](CHANGELOG.md).
+The previous release fixes the Pi 0.86.1 crash when switching
 between regular/fullscreen TUI mode and reloading extensions. It also keeps the
 sidebar attached to the active renderer. The original author and history are
 preserved. Git status is collected asynchronously so it cannot block typing or

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.5-rodrigo.3] - 2026-10-02
+
+- Read rpiv-todo snapshots, task subjects, activity labels, owners and dependencies.
+- Hide deleted tasks and refresh task history on branching and compaction.
+- Preserve the locally installed Pi Goal integration and legacy todo snapshots.
+- Validate against Pi 1.0.0; keep Ctrl+Shift+T available for the sidebar.
+
 ## [1.7.5-rodrigo.2] - 2026-09-21
 
 ### Fixed

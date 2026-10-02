@@ -33,6 +33,31 @@ test("action-only tool input (no list) returns null", () => {
   assert.equal(parseTodos("not an object"), null);
 });
 
+test("rpiv tasks include current activity, owners and dependencies but hide tombstones", () => {
+  assert.deepEqual(parseTodos({ tasks: [
+    { id: 1, subject: "Prepare", status: "completed" },
+    { id: 2, subject: "Implement", status: "in_progress", activeForm: "Editing parser", owner: "implement", blockedBy: [1] },
+    { id: 3, subject: "Removed", status: "deleted" },
+  ] }), [
+    { id: "1", content: "Prepare", status: "completed", subAction: undefined },
+    { id: "2", content: "Implement", status: "in_progress", subAction: "Editing parser", owner: "implement", blockedBy: ["1"] },
+  ]);
+});
+
+test("rpiv empty snapshots clear the sidebar and malformed rows do not crash it", () => {
+  assert.deepEqual(parseTodos({ tasks: [] }), []);
+  assert.deepEqual(parseTodos({ tasks: [{ id: 1, status: "pending" }, null] }), []);
+});
+
+test("resume chooses the latest snapshot across legacy and rpiv formats", () => {
+  const entry = (details: unknown) => ({ type: "message", message: { role: "toolResult", toolName: "todo", details } });
+  const legacy = entry({ todos: [{ id: 1, text: "Original", done: false }], nextId: 2 });
+  const modern = entry({ tasks: [{ id: 1, subject: "Original", status: "in_progress", activeForm: "Checking" }], nextId: 2 });
+  assert.equal(reconstructTodosFromBranch([legacy, modern])[0].status, "in_progress");
+  assert.deepEqual(reconstructTodosFromBranch([legacy, modern, entry({ tasks: [], nextId: 1 })]), []);
+  assert.equal(reconstructTodosFromBranch([modern, legacy])[0].status, "pending");
+});
+
 test("clear action (empty todos array) returns [] not null", () => {
   assert.deepEqual(parseTodos({ action: "clear", todos: [], nextId: 1 }), []);
 });

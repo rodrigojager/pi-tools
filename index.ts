@@ -19,6 +19,8 @@ let todosMax = initialSettings.todosMax;
 let sessionManager: any = null;
 let sessionTitle: string | null = null;
 let todos: TodoItem[] = [];
+let goalTodo: TodoItem | null = null;
+let goalToolAction: string | null = null;
 let currentModel: string | null = null;
 let thinkingLevel: string | null = null;
 let contextTokens: number | null = null;
@@ -70,6 +72,13 @@ function inferThinkingLevel(sm: any): string | null {
 
 const FILLER_PREFIX = /^(can you |could you |please |i want you to |i'd like you to |i need you to |help me |i need to |let's |let us )+/i;
 const METHOD_WRAPPER = /^(use|create|run|make|build|write|add|generate|implement|spawn|start)\s+(?:(?:a|an|the|some|my|one)\s+)?(?:\w+\s+){0,3}(?:to|that|which|for)\s+/i;
+
+function extractGoalObjective(prompt: string): string | null {
+  const match = prompt.match(/<goal_objective>\s*([\s\S]*?)\s*<\/goal_objective>/i);
+  if (!match) return null;
+  const objective = (match[1] ?? "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim();
+  return objective ? objective.replace(/\s+/g, " ").slice(0, 160) : null;
+}
 
 function summarizePrompt(raw: string): string {
   const firstLine = raw.split("\n").map(l => l.trim()).find(l => l.length > 0) ?? raw.trim();
@@ -133,7 +142,7 @@ function buildSidebarContext(cwd: string | undefined): SidebarContext {
   return {
     sessionTitle,
     sessionId: sessionManager?.getSessionId?.() ?? null,
-    todos,
+    todos: goalTodo ? [goalTodo, ...todos.filter((todo) => todo.id !== goalTodo?.id)] : todos,
     todosMax,
     branch: ws.branch,
     aheadCount: ws.aheadCount,
@@ -252,7 +261,23 @@ export default function piSidebar(pi: ExtensionAPI) {
     sessionTitle = ctx.sessionManager.getSessionName() ?? inferSessionTitle(ctx.sessionManager) ?? null;
     // Seed todos from session history so the panel is correct on resume/branch
     // (pi-todo stores a full snapshot in each `todo` tool result's details).
-    todos = reconstructTodosFromBranch(sessionManager?.getBranch?.() ?? []);
+    const branch = sessionManager?.getBranch?.() ?? [];
+    todos = reconstructTodosFromBranch(branch);
+    goalTodo = null;
+    goalToolAction = null;
+    for (const entry of branch) {
+      const message = (entry as any)?.message;
+      if (message?.role === "user") {
+        const content = typeof message.content === "string" ? message.content :
+          Array.isArray(message.content) ? message.content.filter((part: any) => part?.type === "text").map((part: any) => part.text ?? "").join("\n") : "";
+        const objective = extractGoalObjective(content);
+        if (objective) goalTodo = { id: "pi-goal", content: objective, status: "in_progress", subAction: "Resumed Goal" };
+      } else if (message?.role === "toolResult" && goalTodo && !message.isError) {
+        if (message.toolName === "goal_complete") goalTodo = { ...goalTodo, status: "completed", subAction: undefined };
+        else if (message.toolName === "goal_wait") goalTodo = { ...goalTodo, status: "pending", subAction: "Waiting for wake-up" };
+        else if (message.toolName === "goal_blocked") goalTodo = { ...goalTodo, status: "pending", subAction: "Blocked" };
+      }
+    }
     currentModel = null;
     thinkingLevel = null;
     contextTokens = null;
@@ -380,6 +405,14 @@ export default function piSidebar(pi: ExtensionAPI) {
     requestRender?.();
   });
 
+  const refreshTodosFromHistory = async (_event: unknown, ctx: any) => {
+    if (sessionManager?.getSessionId?.() !== ctx.sessionManager?.getSessionId?.()) return;
+    todos = reconstructTodosFromBranch(ctx.sessionManager.getBranch?.() ?? []);
+    requestRender?.();
+  };
+  pi.on("session_tree", refreshTodosFromHistory);
+  pi.on("session_compact", refreshTodosFromHistory);
+
   pi.on("session_shutdown", async () => {
     unsubscribeWorkspace?.();
     unsubscribeWorkspace = null;
@@ -405,10 +438,18 @@ export default function piSidebar(pi: ExtensionAPI) {
     tpsSamples = [];
     sessionTitle = null;
     todos = [];
+    goalTodo = null;
+    goalToolAction = null;
   });
 
   pi.on("before_agent_start", async (event, ctx) => {
     currentCwd = (ctx as any).cwd;
+    const prompt = typeof (event as any).prompt === "string" ? (event as any).prompt as string : "";
+    const goalObjective = extractGoalObjective(prompt);
+    if (goalObjective) {
+      goalTodo = { id: "pi-goal", content: goalObjective, status: "in_progress", subAction: goalToolAction ?? "Working" };
+      requestRender?.();
+    }
     if (sessionTitle === null && typeof (event as any).prompt === "string") {
       const raw = (event as any).prompt as string;
       sessionTitle = summarizePrompt(raw);
@@ -425,6 +466,21 @@ export default function piSidebar(pi: ExtensionAPI) {
     currentCwd = (ctx as any).cwd;
     const toolName = (event as any).toolName ?? "";
     const input = (event as any).input;
+
+    if (goalTodo && !toolName.startsWith("goal_")) {
+      const action = toolName === "read" ? `Read ${input?.file_path ?? input?.path ?? "file"}` :
+        toolName === "bash" ? `Run ${String(input?.command ?? "command").split("\\n")[0].slice(0, 42)}` :
+        toolName === "edit" || toolName === "write" ? `${toolName} ${input?.file_path ?? input?.path ?? "file"}` : toolName;
+      goalToolAction = action.slice(0, 56);
+      goalTodo = { ...goalTodo, status: "in_progress", subAction: goalToolAction };
+      requestRender?.();
+    }
+
+    if (toolName.startsWith("goal_")) {
+      goalToolAction = toolName === "goal_complete" ? "Completing" : toolName === "goal_wait" ? "Waiting" : toolName === "goal_blocked" ? "Blocked" : toolName;
+      goalTodo = goalTodo ? { ...goalTodo, subAction: goalToolAction } : goalTodo;
+      requestRender?.();
+    }
 
     if (TODO_TOOL_PATTERN.test(toolName)) {
       const parsed = parseTodos(input);
@@ -445,6 +501,16 @@ export default function piSidebar(pi: ExtensionAPI) {
     // Todo tools (pi-todo, built-in) keep the list in the tool RESULT
     // details, not the input. The `tool_call` handler above only sees the
     // action ({ action, text, id }), so read the authoritative list here.
+    if (toolName === "goal_complete" && goalTodo && !(event as any).isError) {
+      goalTodo = { ...goalTodo, status: "completed", subAction: undefined };
+      goalToolAction = null;
+      requestRender?.();
+    } else if ((toolName === "goal_wait" || toolName === "goal_blocked") && goalTodo && !(event as any).isError) {
+      goalTodo = { ...goalTodo, status: "pending", subAction: toolName === "goal_wait" ? "Waiting for wake-up" : "Blocked" };
+      goalToolAction = null;
+      requestRender?.();
+    }
+
     if (TODO_TOOL_PATTERN.test(toolName)) {
       const parsed = parseTodos((event as any).details);
       if (parsed !== null) {

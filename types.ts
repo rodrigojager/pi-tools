@@ -5,6 +5,8 @@ export interface TodoItem {
   content: string;
   status: TodoStatus;
   subAction?: string;
+  owner?: string;
+  blockedBy?: string[];
 }
 
 export interface WorkspaceFile {
