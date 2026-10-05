@@ -10,9 +10,9 @@ This companion extension uses Pi's public `registerMarkdownTransformer` API. The
 pi install https://github.com/rodrigojager/pi-goal-highlight
 ```
 
-Keep the original `pi-goal` installed. When an existing Pi session is idle, use `/reload`, then `/goal-highlight-preview` to inspect the colors without a goal or model request.
+Keep exactly one `pi-goal` installed. The [Rodrigo fork](https://github.com/rodrigojager/pi-goal) adds mailbox-linked waits; the upstream package still works for ordinary goal highlighting. When an existing Pi session is idle, use `/reload`, then `/goal-highlight-preview` to inspect the colors without a goal or model request.
 
-Version 1.0.2 fixes updates in an already running session: the presentation helper uses `.ts` so Pi's extension loader reloads it. A native `.mjs` dependency could retain the previous appearance after `/reload`. Reload once after updating to this version; no Pi restart is needed.
+The presentation helper uses `.ts` so Pi's extension loader refreshes it after `/reload`. Wait animation and mailbox status are presentation only. Reload an existing Pi session only when it is idle.
 
 For a local checkout, use `pi -e ./index.ts`. Alternatively, load a wrapper from `~/.pi/agent/extensions` that imports this extension. Do not install both the package and the wrapper: choose one loading method.
 
@@ -25,7 +25,7 @@ For a local checkout, use `pi -e ./index.ts`. Alternatively, load a wrapper from
 - Wraps long text at terminal width, decodes one layer of pi-goal XML escaping and lets Pi render the objective's Markdown. Original prompts and stored messages remain unchanged.
 - Leaves ordinary user messages, assistant messages and incomplete blocks untouched.
 - Uses fixed RGB colors: background `#29213d` (matching the configured Pi goal message background), foreground `#6ee7dc`.
-- Displays an alternating hourglass and elapsed wait time above the editor while the saved active goal is waiting. Work resumes with Pi's normal working indicator. The animation ends on pause, completion, session switch or shutdown.
+- Displays an alternating hourglass and elapsed wait time above the editor while the saved active goal is waiting. A mailbox-linked wait also shows how many children remain, whether a result is ready, and whether the connection or progress looks unhealthy. Work resumes with Pi's normal working indicator. The animation ends on pause, completion, session switch or shutdown.
 - Reads saved goal state for presentation only. A 500 ms UI timer redraws the hourglass and notices local session state changes; it never queries subagents, starts model turns or changes the goal lifecycle.
 
 The objective uses the same purple as the configured Pi goal message renderer, so text, wrapping, blank lines and message margins share one background. No code fence is added by the extension. HTML export and RPC clients do not use the interactive Markdown transformer.

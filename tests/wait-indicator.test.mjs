@@ -22,6 +22,17 @@ test("hourglass animates and retains reason and wait time at bounded width", () 
   assert.ok(renderGoalWait(wait, 0, 12, theme, truncate)[0].length <= 12);
 });
 
+test("mailbox wait shows remaining children and connection health without querying them", () => {
+  const wait = latestWaitingGoal([
+    entry(waiting),
+    { type: "custom", customType: "mailbox-goal-wait", data: { goalId: "goal-a", waitId: "wait-a", jobIds: ["one", "two"] } },
+  ]);
+  assert.match(renderGoalWait(wait, 500, 160, theme, truncate)[0], /aguardando 2 subagentes/);
+  const activity = { waitId: "wait-a", statuses: { one: "succeeded", two: "running" }, ready: false };
+  assert.match(renderGoalWait(wait, 1000, 160, theme, truncate, activity, "disconnected")[0], /aguardando 1 subagente.*conexão perdida/);
+  assert.match(renderGoalWait(wait, 1500, 160, theme, truncate, { ...activity, ready: true }, "responsive")[0], /resultado disponível/);
+});
+
 test("animation reads branch only on state changes and stops on pause, switch and shutdown", () => {
   let entries = [entry(waiting)], leaf = "a", session = "one", now = 0, tick, reads = 0, renders = 0, cancels = 0;
   const widgets = [];
