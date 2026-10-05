@@ -25,7 +25,8 @@ For a local checkout, use `pi -e ./index.ts`. Alternatively, load a wrapper from
 - Wraps long text at terminal width, decodes one layer of pi-goal XML escaping and lets Pi render the objective's Markdown. Original prompts and stored messages remain unchanged.
 - Leaves ordinary user messages, assistant messages and incomplete blocks untouched.
 - Uses fixed RGB colors: background `#29213d` (matching the configured Pi goal message background), foreground `#6ee7dc`.
-- Requires no runtime dependency installation, timers, processes, prompt hooks or goal state access.
+- Displays an alternating hourglass and elapsed wait time above the editor while the saved active goal is waiting. Work resumes with Pi's normal working indicator. The animation ends on pause, completion, session switch or shutdown.
+- Reads saved goal state for presentation only. A 500 ms UI timer redraws the hourglass and notices local session state changes; it never queries subagents, starts model turns or changes the goal lifecycle.
 
 The objective uses the same purple as the configured Pi goal message renderer, so text, wrapping, blank lines and message margins share one background. No code fence is added by the extension. HTML export and RPC clients do not use the interactive Markdown transformer.
 

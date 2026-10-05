@@ -149,7 +149,9 @@ test("actual Pi extension loader registers only presentation and a preview comma
   assert.equal(loaded.extensions.length, 1);
   const extension = loaded.extensions[0];
   assert.equal(extension.tools.size, 0);
-  assert.equal(extension.handlers.size, 0, "no goal, context or prompt hook may be registered");
+  assert.ok(extension.handlers.has("tool_execution_end"));
+  assert.ok(!extension.handlers.has("context"), "presentation never rewrites model context");
+  assert.ok(!extension.handlers.has("before_agent_start"), "presentation never rewrites prompts");
   assert.ok(extension.commands.has("goal-highlight-preview"));
   assert.ok(!extension.commands.has("goal"));
   assert.equal(typeof extension.markdownTransformer, "function");
@@ -181,6 +183,7 @@ test("Pi reload refreshes the helper and preview through the installed wrapper l
   await writeFile(join(fixture, "index.ts"), entry);
   await writeFile(join(fixture, "wrapper.ts"), 'export { default } from "./index.ts";\n');
   await writeFile(join(fixture, "highlight.ts"), helperSource.replace('"[GOAL]"', '"[OLD]"'));
+  await writeFile(join(fixture, "wait-indicator.ts"), await readFile(new URL("../wait-indicator.ts", import.meta.url), "utf8"));
   const preview = async () => {
     const result = await loader.loadExtensions([join(fixture, "wrapper.ts")], fixture);
     assert.deepEqual(result.errors, []);

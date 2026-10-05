@@ -1,7 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { getMarkdownTheme, UserMessageComponent } from "@earendil-works/pi-coding-agent";
-import { Key, matchesKey, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
+import { Key, matchesKey, truncateToWidth, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 import { highlightGoal } from "./highlight.ts";
+import { registerGoalWaitIndicator } from "./wait-indicator.ts";
 
 export default function goalHighlight(pi: ExtensionAPI) {
   if (typeof pi.registerMarkdownTransformer !== "function") {
@@ -10,6 +11,7 @@ export default function goalHighlight(pi: ExtensionAPI) {
   const transform = (markdown: string, context: { messageType: string; availableWidth: number }) =>
     highlightGoal(markdown, context, { visibleWidth, wrapTextWithAnsi });
   pi.registerMarkdownTransformer(transform);
+  registerGoalWaitIndicator(pi, truncateToWidth);
   pi.registerCommand("goal-highlight-preview", {
     description: "Preview goal highlighting without starting a goal or a model request",
     handler: async (_args, ctx) => {
