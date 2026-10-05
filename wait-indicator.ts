@@ -35,6 +35,7 @@ export function renderGoalWait(wait, elapsedMs, width, theme, truncate, activity
     : "aguardando";
   const healthText = health === "disconnected" ? " · conexão perdida"
     : health === "suspected_stall" ? " · supervisor sem resposta"
+      : health === "storage_unavailable" ? " · armazenamento indisponível"
       : health === "observer" ? " · interface observadora" : "";
   return [truncate(`${icon} [GOAL] ${label} · ${elapsed} · ${wait.reason}${healthText}`, Math.max(1, width), "…")];
 }

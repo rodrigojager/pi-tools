@@ -30,6 +30,7 @@ test("mailbox wait shows remaining children and connection health without queryi
   assert.match(renderGoalWait(wait, 500, 160, theme, truncate)[0], /aguardando 2 subagentes/);
   const activity = { waitId: "wait-a", statuses: { one: "succeeded", two: "running" }, ready: false };
   assert.match(renderGoalWait(wait, 1000, 160, theme, truncate, activity, "disconnected")[0], /aguardando 1 subagente.*conexão perdida/);
+  assert.match(renderGoalWait(wait, 1000, 160, theme, truncate, activity, "storage_unavailable")[0], /aguardando 1 subagente.*armazenamento indisponível/);
   assert.match(renderGoalWait(wait, 1500, 160, theme, truncate, { ...activity, ready: true }, "responsive")[0], /resultado disponível/);
 });
 
