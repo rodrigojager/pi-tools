@@ -14,7 +14,7 @@ Created by [Fabio Rizzo Matos](https://github.com/fabiorizzomatos) · `fabiorizz
 - `/mermaid-open` to open the latest diagram directly in the browser
 - `/mermaid` and `Ctrl+Shift+M` for a session-level viewer
 - real SVG-based rendering with terminal image previews
-- ASCII fallback when inline image protocols are unavailable
+- no duplicate inline ASCII diagram when image protocols are unavailable
 
 ## Install
 
@@ -68,7 +68,7 @@ flowchart LR
 What happens next:
 
 1. the extension detects Mermaid fences in assistant responses and user prompts
-2. the diagram is rendered inline in the chat
+2. an inline PNG preview is added when the terminal supports images
 3. the extension stores the diagram metadata outside the LLM context
 4. you can open a larger view with `/mermaid-open` or `/mermaid`
 
@@ -84,7 +84,10 @@ Best experience:
 - WezTerm
 - iTerm2
 
-If the terminal does not support inline images, the extension falls back to ASCII output instead of failing.
+If the terminal does not support inline images, the extension leaves the original
+Mermaid block in the chat without adding a duplicate ASCII preview. Pi can render
+that block with its built-in Mermaid renderer. `/mermaid-open` still opens the SVG
+in a browser, and `/mermaid` still offers a terminal ASCII viewer if needed.
 
 ### Large view
 
@@ -122,7 +125,7 @@ That link is convenient, but terminal behavior varies. Some terminals do not ope
   - a PNG version for inline terminal previews
   - an SVG version for large browser viewing
 - custom Mermaid messages are filtered out of the LLM context
-- assistant previews are appended after `agent_end` so the preview does not appear to duplicate or reorder the original reply
+- when images are supported, assistant previews are appended after `agent_end`
 
 ## Development
 

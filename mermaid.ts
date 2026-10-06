@@ -15,7 +15,6 @@ import {
   createCache,
   getSvgUrlWithCache,
   hashCode,
-  pickBestPreset,
   renderImageWithCache,
   type RenderCache,
 } from "./mermaid-render.ts";
@@ -46,6 +45,10 @@ export default async function mermaidInlineExtension(pi: ExtensionAPI) {
 
     return {
       render(width: number): string[] {
+        // Pi already shows the original Mermaid block. An extra ASCII preview
+        // duplicates it when this terminal cannot display inline images.
+        if (!getCapabilities().images) return [];
+
         if (!entry?.block?.code) {
           return [truncateToWidth(theme.fg("dim", "diagram not found"), width)];
         }
@@ -56,53 +59,36 @@ export default async function mermaidInlineExtension(pi: ExtensionAPI) {
             width,
           );
 
-          if (getCapabilities().images) {
-            const renderedImage = renderImageWithCache(cache, entry.block.code);
-            const maxWidthCells = Math.max(24, Math.min(INLINE_MAX_WIDTH_CELLS, width - 2));
-            const imageKey = `${entry.id}:${maxWidthCells}`;
-            if (!imageComponent || currentImageKey !== imageKey) {
-              imageComponent = new Image(
-                renderedImage.pngBase64,
-                "image/png",
-                {
-                  fallbackColor: (text: string) => theme.fg("dim", text),
-                },
-                {
-                  maxWidthCells,
-                  filename: `mermaid-${entry.id}.png`,
-                  imageId: (imageId ??= allocateImageId()),
-                },
-                renderedImage.dimensions,
-              );
-              currentImageKey = imageKey;
-            }
-
-            const svgUrl = getSvgUrlWithCache(cache, entry.block.code);
-            return [
-              label,
-              ...imageComponent.render(width),
-              truncateToWidth(
-                theme.fg("accent", clickableOpenHint(svgUrl, getOpenHintLabel("abrir grande"))),
-                width,
-              ),
-              truncateToWidth(theme.fg("dim", "/mermaid-open • /mermaid • ctrl+shift+m"), width),
-            ];
+          const renderedImage = renderImageWithCache(cache, entry.block.code);
+          const maxWidthCells = Math.max(24, Math.min(INLINE_MAX_WIDTH_CELLS, width - 2));
+          const imageKey = `${entry.id}:${maxWidthCells}`;
+          if (!imageComponent || currentImageKey !== imageKey) {
+            imageComponent = new Image(
+              renderedImage.pngBase64,
+              "image/png",
+              {
+                fallbackColor: (text: string) => theme.fg("dim", text),
+              },
+              {
+                maxWidthCells,
+                filename: `mermaid-${entry.id}.png`,
+                imageId: (imageId ??= allocateImageId()),
+              },
+              renderedImage.dimensions,
+            );
+            currentImageKey = imageKey;
           }
 
-          const { preset, rendered, overflowed } = pickBestPreset(cache, entry.block.code, width);
-          const lines: string[] = [
-            overflowed
-              ? `${label} ${theme.fg("dim", `[${preset.key}]`)}`
-              : label,
-            ...rendered.lines,
-            theme.fg(
-              "dim",
-              overflowed
-                ? "fallback ASCII — use /mermaid-open or /mermaid"
-                : "ASCII fallback — terminal image protocol unavailable",
+          const svgUrl = getSvgUrlWithCache(cache, entry.block.code);
+          return [
+            label,
+            ...imageComponent.render(width),
+            truncateToWidth(
+              theme.fg("accent", clickableOpenHint(svgUrl, getOpenHintLabel("abrir grande"))),
+              width,
             ),
+            truncateToWidth(theme.fg("dim", "/mermaid-open • /mermaid • ctrl+shift+m"), width),
           ];
-          return lines.map((line) => truncateToWidth(line, width));
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           return [truncateToWidth(theme.fg("dim", `render error: ${message}`), width)];
@@ -114,6 +100,7 @@ export default async function mermaidInlineExtension(pi: ExtensionAPI) {
 
   pi.on("agent_end", async (event) => {
     const pendingDisplay: DiagramEntry[] = [];
+    const showInline = getCapabilities().images;
 
     for (const message of event.messages as Array<{ role?: string; customType?: string; content?: unknown }>) {
       if (message.role !== "assistant") continue;
@@ -126,7 +113,7 @@ export default async function mermaidInlineExtension(pi: ExtensionAPI) {
       for (const block of blocks) {
         if (block.code.length > MAX_CODE_LENGTH) continue;
         const entry = createDiagramEntry(text, block, "assistant");
-        if (addDiagram(entry)) {
+        if (addDiagram(entry) && showInline) {
           pendingDisplay.push(entry);
         }
       }
