@@ -1,0 +1,16 @@
+{
+  "name": "pi-prose-spacing-guard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Block strongly malformed prose handoffs before Pi passes them to subagents",
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  }
+}
