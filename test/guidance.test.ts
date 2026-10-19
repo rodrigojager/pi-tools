@@ -1,12 +1,34 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import {
+import piZgExtension, {
   formatBinaryLine,
   formatDaemonLine,
   guidanceText,
   shouldInjectGuidance,
 } from "../src/index.ts";
+
+test("structured guidance preserves prompt sections without reading the legacy prompt", () => {
+  const handlers = new Map();
+  const pi = {
+    on(name: string, handler: unknown) {
+      handlers.set(name, handler);
+    },
+    registerCommand() {},
+    registerTool() {},
+  };
+  piZgExtension(pi as never);
+  const sections = { agent_profile: "Keep active profile" };
+  const result = handlers.get("before_agent_start")({
+    get systemPrompt() {
+      throw new Error("must not flatten the prompt");
+    },
+    systemPromptOptions: { sections },
+  });
+  assert.equal(result, undefined);
+  assert.equal(sections.agent_profile, "Keep active profile");
+  assert.equal((sections as Record<string, string>).zg_search, guidanceText());
+});
 
 test("guidance names the four routes and the fallback rule", () => {
   const t = guidanceText();

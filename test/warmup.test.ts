@@ -89,3 +89,35 @@ test("warmup with missing binary: bails with no spawns and no install", async ()
     assert.deepEqual(calls, ["status:cleared"]);
   });
 });
+
+test("warmup never rereads a guarded ctx.ui after asynchronous work", async () => {
+  const { ui, calls } = makeUi();
+  let reads = 0;
+  await sessionWarmup(
+    {
+      cwd: tmpdir(),
+      get ui() {
+        reads += 1;
+        if (reads > 1) {
+          throw new Error("stale ctx");
+        }
+        return ui;
+      },
+    },
+    { PI_ZG_BIN: "/nonexistent/zg-binary-xyz" }
+  );
+  assert.equal(reads, 1);
+  assert.deepEqual(calls, ["status:cleared"]);
+});
+
+test("cancelled warmup does not update the disposed UI", async () => {
+  const controller = new AbortController();
+  controller.abort();
+  const { ui, calls } = makeUi();
+  await sessionWarmup(
+    { cwd: tmpdir(), ui },
+    { PI_ZG_BIN: "/nonexistent/zg-binary-xyz" },
+    controller.signal
+  );
+  assert.deepEqual(calls, []);
+});

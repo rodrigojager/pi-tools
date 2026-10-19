@@ -905,15 +905,19 @@ export interface WarmupCtx {
 //     upstream enforces a single instance per home via the fixed port), so
 //     a daemon from a previous session is reused and a dead one revives at
 //     startup instead of staying down until the next build.
-// ponytail: locks are per-process — two pi windows on the same cold repo can
-// race two `zg index` runs; upstream tolerates concurrent builds. Split a
-// cross-process lock only if that ever misbehaves.
+// Locks are per-process. Existing stale indexes are reused without starting
+// a competing build; a cold-root ownership race remains retryable.
 export const sessionWarmup = async (
   ctx: WarmupCtx,
-  env: Record<string, string | undefined> = process.env
+  env: Record<string, string | undefined> = process.env,
+  signal?: AbortSignal
 ): Promise<void> => {
+  // ctx.ui is a guarded getter: reading it after shutdown/reload throws.
+  const { ui } = ctx;
   const onProgress = (s: string): void => {
-    ctx.ui.setStatus("pi-zg", s.slice(0, 80));
+    if (!signal?.aborted) {
+      ui.setStatus("pi-zg", s.slice(0, 80));
+    }
   };
   const chain = getOrCreateZg({
     cwd: ctx.cwd,
@@ -930,26 +934,35 @@ export const sessionWarmup = async (
     // be running — background refresh and embedding-model reuse span
     // sessions. zg enforces a single instance per home (fixed listen port),
     // so this can never stack a second daemon over a previous session's.
+    if (signal?.aborted) {
+      return;
+    }
     chain.zg.startServerOnce();
-    ctx.ui.setStatus("pi-zg", "checking index…");
-    const idx = await chain.zg.ensureIndex();
-    if (idx.error) {
-      ctx.ui.notify(`zg warmup: ${idx.error}`, "error");
+    ui.setStatus("pi-zg", "checking index…");
+    const idx = await chain.zg.ensureIndex({ signal });
+    if (idx.error && !signal?.aborted) {
+      ui.notify(`zg warmup: ${idx.error}`, "error");
     }
   } catch {
     // Warmup must never break session start; the tool path surfaces real
     // errors (install failures, PI_ZG_BIN misconfig) to the agent.
   } finally {
-    ctx.ui.setStatus("pi-zg", undefined);
+    if (!signal?.aborted) {
+      ui.setStatus("pi-zg", undefined);
+    }
   }
 };
 
 const registerSessionWarmup = (pi: ExtensionAPI): void => {
+  let activeWarmup: AbortController | undefined;
   pi.on("session_start", (_event, ctx) => {
+    activeWarmup?.abort();
+    activeWarmup = new AbortController();
     // Fire-and-forget: never block startup on an index build. Reload/resume
     // re-runs it — two cheap spawns on a warm repo.
-    void sessionWarmup(ctx);
+    void sessionWarmup(ctx, process.env, activeWarmup.signal);
   });
+  pi.on("session_shutdown", () => activeWarmup?.abort());
 };
 
 // --- Guidance event ---------------------------------------------------------
@@ -957,6 +970,15 @@ const registerSessionWarmup = (pi: ExtensionAPI): void => {
 const registerGuidance = (pi: ExtensionAPI): void => {
   pi.on("before_agent_start", (event) => {
     if (!shouldInjectGuidance(process.env)) {
+      return;
+    }
+    // Keep Pi's structured prompt and transcript deltas intact. Forcing a
+    // rendered prompt exercises the broken forced-prompt path in Pi 1.3.0.
+    const options = event.systemPromptOptions as
+      | { sections?: Record<string, string> }
+      | undefined;
+    if (options?.sections) {
+      options.sections.zg_search = guidanceText();
       return;
     }
     return { systemPrompt: `${event.systemPrompt}\n\n${guidanceText()}` };

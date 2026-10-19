@@ -3,6 +3,11 @@
 // pure logic + interface, fully mocked-testable — no child_process here.
 
 import { buildIndexArgs, buildStatusArgs } from "./args.ts";
+import { parseStatusOutput } from "./parse.ts";
+
+class IndexBusyError extends Error {
+  override name = "IndexBusyError";
+}
 
 export interface RunResult {
   code: number;
@@ -177,15 +182,13 @@ export const createZg = (runner: Runner, opts: ZgOpts) => {
     const TAIL_MAX = 10;
     const tail: string[] = [];
     const userOnUpdate = hooks.onUpdate ?? opts.onUpdate;
-    const wrappedOnUpdate = userOnUpdate
-      ? (s: string): void => {
-          tail.push(s);
-          if (tail.length > TAIL_MAX) {
-            tail.shift();
-          }
-          userOnUpdate(s);
-        }
-      : undefined;
+    const wrappedOnUpdate = (s: string): void => {
+      tail.push(s);
+      if (tail.length > TAIL_MAX) {
+        tail.shift();
+      }
+      userOnUpdate?.(s);
+    };
     const res = await runner.stream(buildIndexArgs(), {
       cwd: opts.root,
       onUpdate: wrappedOnUpdate,
@@ -194,6 +197,11 @@ export const createZg = (runner: Runner, opts: ZgOpts) => {
     if (res.code !== 0) {
       const tailText =
         tail.length > 0 ? `\nLast output:\n${tail.join("\n")}` : "";
+      if (tail.some((line) => line.includes("[INDEX_BUSY]"))) {
+        throw new IndexBusyError(
+          "zg index is being maintained by another daemon. Retry the query shortly; use native rg while it is unavailable."
+        );
+      }
       throw new Error(`zg index failed (exit ${res.code}).${tailText}`);
     }
   };
@@ -229,6 +237,11 @@ export const createZg = (runner: Runner, opts: ZgOpts) => {
     if (st.code === 0) {
       return {};
     }
+    const status = parseStatusOutput(st.stdout);
+    if (!("raw" in status) && status.usable) {
+      startServerOnce();
+      return {};
+    }
     // F1: a concurrent call already started a build for this session — just
     // wait for it. Adding the root to failedRoots here would mark the
     // in-flight build as already-failed and surface a spurious memo to the
@@ -259,7 +272,10 @@ export const createZg = (runner: Runner, opts: ZgOpts) => {
         await runBuild(hooks);
         startServerOnce();
       } catch (error) {
-        failedRoots.add(opts.root);
+        // Ownership contention is temporary, not a failed index build.
+        if (!(error instanceof IndexBusyError)) {
+          failedRoots.add(opts.root);
+        }
         throw error;
       } finally {
         buildP = undefined;

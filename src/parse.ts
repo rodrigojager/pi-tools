@@ -14,7 +14,7 @@ export interface ZgResult {
 export type QueryParse = { results: ZgResult[] } | { raw: string };
 
 export type StatusParse =
-  | { ready: boolean; freshness?: string }
+  | { ready: boolean; freshness?: string; usable?: boolean }
   | { raw: string };
 
 const HIT_LINE =
@@ -220,6 +220,12 @@ export const parseStatusOutput = (text: string): StatusParse => {
   const firstNonEmpty = text.split(/\r?\n/u).find((l) => l.length > 0);
   if (firstNonEmpty === undefined) {
     return { raw: text };
+  }
+
+  // 0.2.2 reports a usable index with pending file changes as stale.
+  // Queries can serve it while the owning daemon refreshes it.
+  if (/^! Workspace index needs an update\s*$/u.test(firstNonEmpty)) {
+    return { freshness: "possibly_stale", ready: false, usable: true };
   }
 
   const m = STATUS_MARKER.exec(firstNonEmpty);

@@ -116,3 +116,14 @@ test("rendering is ripgrep-style lines per result", () => {
   });
   assert.match(out, /src\/a\.ts:3-7\s+0\.9\s+export function loadTheme/u);
 });
+
+test("0.2.2 stale index is usable without claiming it is fresh", () => {
+  assert.deepEqual(
+    parseStatusOutput("! Workspace index needs an update\n  repo\n"),
+    {
+      freshness: "possibly_stale",
+      ready: false,
+      usable: true,
+    }
+  );
+});

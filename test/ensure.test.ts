@@ -52,6 +52,45 @@ test("ready index: no index command runs", async () => {
   assert.deepEqual(r.calls, []);
 });
 
+test("existing stale index is served without competing for daemon writes", async () => {
+  const runner = fakeRunner({
+    probeStatus: () =>
+      Promise.resolve({
+        code: 1,
+        stderr: "",
+        stdout: "! Workspace index needs an update\n",
+      }),
+  });
+  const zg = createZg(runner, { root: "/stale" });
+  assert.deepEqual(await zg.ensureIndex(), {});
+  assert.deepEqual(await zg.ensureIndex(), {});
+  assert.equal(runner.calls.filter((args) => args[0] === "index").length, 0);
+  assert.equal(runner.calls.filter((args) => args[0] === "server").length, 1);
+});
+
+test("INDEX_BUSY is not memoized as a broken index, including without progress hooks", async () => {
+  let builds = 0;
+  const runner = fakeRunner({
+    probeStatus: () =>
+      Promise.resolve({ code: 1, stderr: "", stdout: "not ready" }),
+    stream: (_args, options) => {
+      builds += 1;
+      if (builds === 1) {
+        options?.onUpdate?.(
+          "Error: [INDEX_BUSY] Another daemon owns index writes for this root."
+        );
+        return Promise.resolve({ code: 1 });
+      }
+      return Promise.resolve({ code: 0 });
+    },
+  });
+  const zg = createZg(runner, { root: "/busy" });
+  const busy = await zg.ensureIndex();
+  assert.match(busy.error ?? "", /another daemon/u);
+  assert.deepEqual(await zg.ensureIndex(), {});
+  assert.equal(builds, 2);
+});
+
 test("cold index builds once under parallel calls, then starts daemon once", async () => {
   const r = fakeRunner({
     probeStatus: (): Promise<{
