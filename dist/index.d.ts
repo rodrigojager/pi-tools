@@ -1,2 +1,2 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-export default function opencodeDirectExtension(pi: ExtensionAPI): void;
+export default function opencodeDirectExtension(pi: ExtensionAPI): Promise<void>;

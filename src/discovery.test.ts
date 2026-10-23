@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import assert from "node:assert/strict";
 import test from "node:test";
-import { discoverModels, filterFreeModels } from "./discovery.js";
+import { discoverModels, discoverCatalogs, filterFreeModels } from "./discovery.js";
 
 test("filterFreeModels filters free models with conservative default metadata", () => {
   const input = [
@@ -107,4 +107,32 @@ test("discoverModels returns empty list when fetch times out or aborts", async (
 
   const models = await discoverModels({ fetchFn: hangingFetch as unknown as typeof fetch, timeoutMs: 10 });
   assert.deepEqual(models, []);
+});
+
+test("one endpoint failing does not hide the other endpoint and malformed responses are not authoritative empties", async () => {
+  const fetchFn = (async (url: any) => ({
+    ok: true, json: async () => String(url).includes("/go/")
+      ? { data: [{ id: "deepseek-flash" }, { id: "deepseek-v4.1-flash" }] }
+      : String(url).includes("models.dev") ? {} : { unexpected: true },
+  })) as typeof fetch;
+  const result = await discoverCatalogs({ fetchFn });
+  assert.equal(result.zen, null);
+  assert.deepEqual(result.go?.models.map(m => m.id), ["opencode-go/deepseek-flash", "opencode-go/deepseek-v4.1-flash"]);
+});
+
+test("metadata-only IDs never get added to the live catalog", async () => {
+  const fetchFn = (async (url: any) => ({
+    ok: true, json: async () => String(url).includes("models.dev")
+      ? { opencode: { models: { "retired-free": {}, "current-free": {} } } }
+      : { data: [{ id: "current-free" }] },
+  })) as typeof fetch;
+  const result = await discoverCatalogs({ fetchFn });
+  assert.deepEqual(result.zen?.models.map(m => m.id), ["opencode/current-free"]);
+});
+
+test("deprecated free promotions are removed even when Zen still advertises the old ID", () => {
+  const result = filterFreeModels([{ id: "deepseek-v4-flash-free" }, { id: "current-free" }], {
+    catalog: { "deepseek-v4-flash-free": { status: "deprecated" }, "current-free": {} },
+  });
+  assert.deepEqual(result.map(m => m.id), ["opencode/current-free"]);
 });

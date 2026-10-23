@@ -2,179 +2,149 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { readFileSync } from "node:fs";
 import opencodeDirectExtension from "./index.js";
-import { discoverModels } from "./discovery.js";
 
-test("registers provider once with empty initial models and no boot fetch", async () => {
+function fakePi() {
+  const providers = new Map<string, any>();
+  const handlers = new Map<string, any>();
+  const pi = {
+    registerProvider(id: any, config?: any) { providers.set(typeof id === "string" ? id : id.id, config ?? id); },
+    on(event: string, handler: any) { handlers.set(event, handler); },
+  } as unknown as ExtensionAPI;
+  return { pi, providers, handlers };
+}
+
+const metadata = {
+  opencode: { models: {
+    "future-responses-free": { reasoning: true, provider: { npm: "@ai-sdk/openai" }, limit: { context: 256000, output: 8192 } },
+    "claude-future": { provider: { npm: "@ai-sdk/anthropic" } },
+  } },
+  "opencode-go": { models: {
+    "deepseek-v4.1-flash": { reasoning: true, limit: { context: 1000000, output: 384000 }, cost: { input: 0.15, output: 0.6 } },
+    "go-responses": { provider: { npm: "@ai-sdk/openai" } },
+  } },
+};
+
+function routes(zen = ["big-pickle", "future-responses-free", "claude-future"], go = ["deepseek-v4.1-flash", "go-responses"]) {
+  return (async (url: any) => ({ ok: true, json: async () =>
+    String(url).includes("models.dev") ? metadata
+      : { data: (String(url).includes("/go/") ? go : zen).map(id => ({ id })) },
+  })) as typeof fetch;
+}
+
+function context(extra: Record<string, unknown> = {}) {
+  const persisted: any[] = [];
+  return {
+    ctx: {
+      allowNetwork: true, signal: new AbortController().signal,
+      publish: async (p: any) => { if (p.persist) persisted.push(p.persist); p.update?.(); return true; },
+      ...extra,
+    }, persisted,
+  };
+}
+
+test("startup discovers all three catalogs before registration and keeps Go routing separate", async () => {
   const originalFetch = globalThis.fetch;
-  let fetchCount = 0;
-  globalThis.fetch = (async () => { fetchCount++; throw new Error("must not fetch"); }) as typeof fetch;
+  globalThis.fetch = routes();
   try {
-    let registeredId = ""; let registeredConfig: any = null;
-    const fakePi = {
-      registerProvider(id: string, config: any) { registeredId = id; registeredConfig = config; },
-    } as unknown as ExtensionAPI;
-    await opencodeDirectExtension(fakePi);
-    assert.equal(registeredId, "opencode-free");
-    assert.equal(fetchCount, 0);                    // no fetch during extension load
-    assert.deepEqual(registeredConfig.models, []);  // populated by refreshModels
-    assert.equal(registeredConfig.api, "openai-completions");
-    assert.equal(registeredConfig.baseUrl, "https://opencode.ai/zen/v1");
-    assert.equal(registeredConfig.name, "OpenCode Direct (Free)");
-    assert.equal(registeredConfig.apiKey, "none");
-    assert.equal(registeredConfig.headers["x-opencode-client"], "cli");
-    assert.equal(registeredConfig.headers["x-opencode-project"], "global");
-    assert.equal(typeof registeredConfig.refreshModels, "function");
-    // Thin keyless shim over the native engine.
-    assert.equal(typeof registeredConfig.streamSimple, "function");
+    const f = fakePi();
+    await opencodeDirectExtension(f.pi);
+    assert.deepEqual([...f.providers.keys()].sort(), ["opencode", "opencode-direct", "opencode-go"]);
+    assert.deepEqual(f.providers.get("opencode-direct").models.map((m: any) => m.id), ["big-pickle", "future-responses-free"]);
+    const go = f.providers.get("opencode-go").getModels();
+    assert.equal(go[0].id, "deepseek-v4.1-flash");
+    assert.equal(go[0].baseUrl, "https://opencode.ai/zen/go/v1");
+    assert.equal(go[0].contextWindow, 1000000);
+    assert.equal(go[0].cost.input, 0.15);
+    assert.equal(go[1].api, "openai-responses");
+    assert.equal(f.providers.get("opencode").getModels().find((m: any) => m.id === "claude-future").api, "anthropic-messages");
+    assert.ok(f.handlers.has("session_start"));
+    assert.ok(f.handlers.has("session_shutdown"));
+    assert.ok(f.handlers.has("before_agent_start"));
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test("module exports are defined and functions", () => {
-  assert.equal(typeof opencodeDirectExtension, "function");
-  assert.equal(typeof discoverModels, "function");
-});
-
-test("package.json is configured for public release and distribution", () => {
-  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
-  assert.equal(pkg.private, undefined, "package must not be private");
-  assert.equal(pkg.license, "GPL-3.0-or-later");
-  assert.deepEqual(pkg.pi?.extensions, ["./dist/index.js"]);
-  assert.ok(pkg.files?.includes("dist"));
-  assert.ok(pkg.scripts?.prepack);
-});
-
-test("cache-only refresh restores persisted snapshot without network", async () => {
+test("successful refresh replaces removed IDs, persists exact catalogs, and shares network work", async () => {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async () => { throw new Error("must not fetch"); }) as typeof fetch;
+  globalThis.fetch = routes();
   try {
-    let registeredConfig: any = null;
-    const fakePi = {
-      registerProvider(_id: string, config: any) { registeredConfig = config; },
-    } as unknown as ExtensionAPI;
-    await opencodeDirectExtension(fakePi);
-
-    const completionsModel = {
-      id: "hy3-free", name: "Hy3 (Free)", api: "openai-completions",
-      provider: "opencode-free", baseUrl: "https://opencode.ai/zen/v1",
-      reasoning: true, input: ["text"], contextWindow: 256_000, maxTokens: 64_000,
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      compat: { supportsStore: false, supportsDeveloperRole: false, maxTokensField: "max_tokens" },
-    };
-    const responsesModel = {
-      ...completionsModel,
-      id: "muse-spark-1.2-contributor-free", name: "Muse Spark 1.2 Free",
-      api: "openai-responses",
-    };
-    const restored = await registeredConfig.refreshModels({
-      allowNetwork: false,
-      signal: new AbortController().signal,
-      stored: { models: [completionsModel, responsesModel] },
-      publish: async () => true,
-    });
-    assert.equal(restored.length, 2);
-    assert.equal(restored[0].id, "hy3-free");            // stripped back to config shape
-    assert.equal(restored[0].contextWindow, 256_000);
-    assert.equal((restored[0] as any).provider, undefined); // provider/baseUrl removed
-    assert.equal((restored[1] as any).api, "openai-responses"); // per-model API survives restore
+    const f = fakePi(); await opencodeDirectExtension(f.pi);
+    let requests = 0;
+    const fixture = routes(["new-free"], ["new-go"]);
+    globalThis.fetch = (async (...args: Parameters<typeof fetch>) => { requests++; return fixture(...args); }) as typeof fetch;
+    const c = context({ force: true });
+    await Promise.all([...f.providers.values()].map(p => p.refreshModels(c.ctx)));
+    assert.equal(requests, 3, "one Zen, one Go and one metadata request");
+    assert.deepEqual(f.providers.get("opencode").getModels().map((m: any) => m.id), ["new-free"]);
+    assert.deepEqual(f.providers.get("opencode-go").getModels().map((m: any) => m.id), ["new-go"]);
+    assert.equal(c.persisted.length, 3);
+    assert.ok(c.persisted.every(p => p.checkedAt > 0));
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test("cache-only refresh with no stored snapshot yields empty list", async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async () => { throw new Error("must not fetch"); }) as typeof fetch;
-  try {
-    let registeredConfig: any = null;
-    const fakePi = {
-      registerProvider(_id: string, config: any) { registeredConfig = config; },
-    } as unknown as ExtensionAPI;
-    await opencodeDirectExtension(fakePi);
-    const restored = await registeredConfig.refreshModels({
-      allowNetwork: false, signal: new AbortController().signal,
-      stored: undefined, publish: async () => true,
-    });
-    assert.deepEqual(restored, []);
-  } finally { globalThis.fetch = originalFetch; }
-});
-
-test("network refresh discovers models and persists a stamped snapshot", async () => {
-  const originalFetch = globalThis.fetch;
-  const zenResponse = { ok: true, json: async () => ({ data: [{ id: "hy3-free", name: "Hy3" }] }) };
-  let published: any = null;
-  globalThis.fetch = (async () => zenResponse) as unknown as typeof fetch;
-  try {
-    let registeredConfig: any = null;
-    const fakePi = {
-      registerProvider(_id: string, config: any) { registeredConfig = config; },
-    } as unknown as ExtensionAPI;
-    await opencodeDirectExtension(fakePi);
-
-    const refreshed = await registeredConfig.refreshModels({
-      allowNetwork: true,
-      signal: new AbortController().signal,
-      stored: undefined,
-      publish: async (publication: any) => { published = publication; return true; },
-    });
-
-    assert.equal(refreshed[0].id, "hy3-free");
-    assert.equal(refreshed[0].compat.maxTokensField, "max_tokens"); // config shape
-    assert.ok(published, "persist must be called on successful discovery");
-    assert.equal(published.persist.models[0].provider, "opencode-free"); // stamped
-    assert.equal(published.persist.models[0].api, "openai-completions");
-    assert.equal(typeof published.persist.checkedAt, "number");
-  } finally { globalThis.fetch = originalFetch; }
-});
-
-test("network refresh never wipes a good snapshot when discovery comes back empty", async () => {
+test("offline startup has no invented free IDs and restores the last stored snapshot", async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () => { throw new Error("Offline"); }) as typeof fetch;
   try {
-    let registeredConfig: any = null; let publishCalled = false;
-    const fakePi = {
-      registerProvider(_id: string, config: any) { registeredConfig = config; },
-    } as unknown as ExtensionAPI;
-    await opencodeDirectExtension(fakePi);
-    const refreshed = await registeredConfig.refreshModels({
-      allowNetwork: true, signal: new AbortController().signal,
-      stored: { models: [{ id: "old", provider: "opencode-free", api: "openai-completions" }] },
-      publish: async () => { publishCalled = true; return true; },
-    });
-    assert.deepEqual(refreshed, []);
-    assert.equal(publishCalled, false);
+    const f = fakePi(); await opencodeDirectExtension(f.pi);
+    const direct = f.providers.get("opencode-direct");
+    assert.deepEqual(direct.models, []);
+    const { ctx } = context({ allowNetwork: false, stored: { models: [{
+      id: "future-responses-free", name: "Future", provider: "opencode-direct", api: "openai-responses",
+      baseUrl: "https://opencode.ai/zen/v1", reasoning: true, input: ["text"],
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, contextWindow: 256000, maxTokens: 8192,
+    }] } });
+    const restored = await direct.refreshModels(ctx);
+    assert.equal(restored[0].id, "future-responses-free");
+    assert.equal(restored[0].api, "openai-completions", "the direct wrapper must not be bypassed");
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test("network refresh respects abort signal before fetching", async () => {
+test("fresh startup catalog wins over obsolete cached IDs; failures keep the last good list", async () => {
   const originalFetch = globalThis.fetch;
-  let fetchCount = 0;
-  globalThis.fetch = (async () => { fetchCount++; return { ok: true }; }) as unknown as typeof fetch;
+  globalThis.fetch = routes();
   try {
-    let registeredConfig: any = null;
-    const fakePi = {
-      registerProvider(_id: string, config: any) { registeredConfig = config; },
-    } as unknown as ExtensionAPI;
-    await opencodeDirectExtension(fakePi);
-    const controller = new AbortController();
-    controller.abort();
-    const refreshed = await registeredConfig.refreshModels({
-      allowNetwork: true, signal: controller.signal,
-      stored: undefined, publish: async () => true,
-    });
-    assert.deepEqual(refreshed, []);
-    assert.equal(fetchCount, 0);
+    const f = fakePi(); await opencodeDirectExtension(f.pi);
+    const direct = f.providers.get("opencode-direct");
+    const offline = context({ allowNetwork: false, stored: { models: [{ id: "removed-free", provider: "opencode-direct", api: "openai-completions" }] } });
+    assert.equal((await direct.refreshModels(offline.ctx))[0].id, "big-pickle");
+    globalThis.fetch = (async () => { throw new Error("Offline"); }) as typeof fetch;
+    const c = context({ force: true });
+    const results = await Promise.allSettled([...f.providers.values()].map(p => p.refreshModels(c.ctx)));
+    assert.ok(results.every(r => r.status === "rejected"));
+    assert.equal(c.persisted.length, 0, "failed requests must not stamp a fresh snapshot");
+    assert.equal(f.providers.get("opencode-go").getModels()[0].id, "deepseek-v4.1-flash");
+    assert.equal((await direct.refreshModels(offline.ctx))[0].id, "big-pickle");
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test("registers no slash commands", async () => {
+test("authoritative empty catalogs remove the previous list instead of reviving a static fallback", async () => {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async () => ({ ok: true, json: async () => ({ data: [] }) })) as unknown as typeof fetch;
+  globalThis.fetch = routes();
   try {
-    const commands: string[] = [];
-    const fakePi = {
-      registerProvider() {},
-    } as unknown as ExtensionAPI;
-    await opencodeDirectExtension(fakePi);
-    assert.deepEqual(commands, []);
+    const f = fakePi(); await opencodeDirectExtension(f.pi);
+    globalThis.fetch = routes([], []);
+    const c = context({ force: true });
+    const direct = f.providers.get("opencode-direct");
+    assert.deepEqual(await direct.refreshModels(c.ctx), []);
+    await f.providers.get("opencode-go").refreshModels(c.ctx);
+    assert.deepEqual(f.providers.get("opencode-go").getModels(), []);
+    assert.ok(c.persisted.every(p => p.models.length === 0));
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test("cancelled refresh neither publishes nor changes the current catalog", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = routes();
+  try {
+    const f = fakePi(); await opencodeDirectExtension(f.pi);
+    const controller = new AbortController(); controller.abort();
+    let fetches = 0;
+    globalThis.fetch = (async () => { fetches++; throw new Error("Must not fetch"); }) as typeof fetch;
+    const c = context({ force: true, signal: controller.signal });
+    await Promise.all([...f.providers.values()].map(p => p.refreshModels(c.ctx)));
+    assert.equal(fetches, 0);
+    assert.equal(c.persisted.length, 0);
+    assert.equal(f.providers.get("opencode-go").getModels()[0].id, "deepseek-v4.1-flash");
   } finally { globalThis.fetch = originalFetch; }
 });

@@ -13,9 +13,12 @@ import opencodeDirectExtension from "./index.js";
 async function getShim() {
   let registeredConfig: any = null;
   const fakePi = {
-    registerProvider(_id: string, config: any) { registeredConfig = config; },
+    registerProvider(id: any, config?: any) { if (id === "opencode-direct") registeredConfig = config; },
+    on() {},
   } as unknown as ExtensionAPI;
-  await opencodeDirectExtension(fakePi);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => ({ ok: true, json: async () => ({ data: [] }) })) as unknown as typeof fetch;
+  try { await opencodeDirectExtension(fakePi); } finally { globalThis.fetch = originalFetch; }
   return registeredConfig;
 }
 
@@ -70,10 +73,36 @@ test("max_tokens is never renamed by any transform", async () => {
   assert.equal("max_completion_tokens" in p, false);
 });
 
-test("keyless shim wins over hook-injected Authorization in final header composition", async () => {
+test("real native transport preserves Pi tools, public auth and OpenCode request headers", async () => {
   const cfg = await getShim();
-  const hookMutated = { ...cfg.headers, Authorization: "Bearer x", "x-session-affinity": "sess-1" };
-  const viaShim = { ...hookMutated, Authorization: null }; // shim spread, runs last
-  assert.equal(viaShim.Authorization, null);
-  assert.equal(viaShim["x-opencode-client"], "cli");
+  let request: any;
+  const model: any = {
+    id: "big-pickle", name: "Big Pickle", provider: "opencode-direct", api: "openai-completions",
+    baseUrl: cfg.baseUrl, reasoning: false, input: ["text"], contextWindow: 128000, maxTokens: 16384,
+    cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, compat: { maxTokensField: "max_tokens" },
+  };
+  const stream = cfg.streamSimple(model, {
+    messages: [{ role: "user", content: "Say OK", timestamp: Date.now() }],
+    tools: [{ name: "read", description: "Real Pi read tool", parameters: { type: "object", properties: {} } }],
+  }, {
+    maxTokens: 20, sessionId: "stable-fixture-session", headers: { Authorization: "Bearer wrong" },
+    onPayload: (payload: any) => addOpenAIPromptCacheKey(payload, "cache-key"),
+    fetch: async (url: any, init: any) => {
+      request = { url: String(url), headers: new Headers(init.headers), body: JSON.parse(init.body) };
+      return new Response(
+        'data: {"id":"c1","object":"chat.completion.chunk","created":1,"model":"big-pickle","choices":[{"index":0,"delta":{"content":"OK"},"finish_reason":null}]}\n\n' +
+        'data: {"id":"c1","object":"chat.completion.chunk","created":1,"model":"big-pickle","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n' +
+        'data: [DONE]\n\n',
+        { headers: { "content-type": "text/event-stream" } },
+      );
+    },
+  });
+  const final = await stream.result();
+  assert.equal(final.stopReason, "stop", final.errorMessage);
+  assert.equal(request.url, "https://opencode.ai/zen/v1/chat/completions");
+  assert.equal(request.headers.get("Authorization"), "Bearer public");
+  assert.match(request.headers.get("x-opencode-session"), /^ses_[a-f0-9]{26}$/);
+  assert.equal(request.body.prompt_cache_key, "cache-key");
+  assert.equal(request.body.tools.find((t: any) => t.function.name === "read").function.description, "Real Pi read tool");
+  assert.ok(request.body.tools.some((t: any) => t.function.name === "task"));
 });

@@ -4,23 +4,16 @@ import { randomUUID } from "node:crypto";
 // only whitelists exact subpaths (/compat, /oauth, /providers/all), so deeper
 // subpath imports like .../api/openai-completions fail to resolve at load time.
 import { openAICompletionsApi, openAIResponsesApi } from "@earendil-works/pi-ai/compat";
-import { discoverModels } from "./discovery.js";
+import { builtinProviders } from "@earendil-works/pi-ai/providers/all";
+import { createCatalogDiscovery } from "./discovery.js";
+import { withOpenCodeCatalog } from "./catalog-provider.js";
+import { installAutoRefresh } from "./auto-refresh.js";
 const nativeOpenAICompletionsStream = openAICompletionsApi().streamSimple;
 const nativeOpenAIResponsesStream = openAIResponsesApi().streamSimple;
 const PROVIDER_ID = "opencode-direct";
 const BASE_URL = "https://opencode.ai/zen/v1";
 const OPENCODE_NATIVE_TOOLS = [
     "bash", "edit", "glob", "grep", "read", "skill", "task", "todowrite", "webfetch", "websearch", "write",
-];
-const FALLBACK_MODEL_IDS = [
-    "big-pickle",
-    "deepseek-v4-flash-free",
-    "ling-3.0-flash-fin-free",
-    "mimo-v2.5-free",
-    "muse-spark-1.2-contributor-free",
-    "muse-spark-1.3-contributor-free",
-    "nemotron-3-ultra-free",
-    "nemotron-3.5-lightning-free",
 ];
 function nativeId(prefix) {
     return `${prefix}_${randomUUID().replaceAll("-", "").slice(0, 26)}`;
@@ -66,7 +59,7 @@ const OPENCODE_COMPAT = {
 function toProviderModel(m) {
     return {
         id: m.id.replace(/^opencode\//, ""),
-        name: m.name,
+        name: m.status === "deprecated" ? `${m.name} [Deprecated]` : m.name,
         // Keep every model on the provider's registered API so Pi always enters
         // our streamSimple wrapper. Responses-only models are dispatched by ID
         // inside the wrapper; exposing openai-responses here would bypass the
@@ -88,62 +81,64 @@ function fromStoredModel(m) {
     const { provider: _provider, baseUrl: _baseUrl, ...config } = m;
     return config;
 }
-export default function opencodeDirectExtension(pi) {
-    // Registered once with an empty list; models come exclusively through
-    // refreshModels (snapshot restore on session init, live discovery on
-    // explicit refresh) — pi's native model lifecycle.
+export default async function opencodeDirectExtension(pi) {
+    const discovery = createCatalogDiscovery();
+    // Resolve IDs before Pi's initial CLI model selection, not after a failed request.
+    await discovery.refresh();
+    const freeModels = () => discovery.current().zen?.models.filter(m => /-free$|\/big-pickle$/.test(m.id));
+    let responseIds = new Set();
+    const convert = (models) => {
+        responseIds = new Set(models.filter(m => m.api === "openai-responses").map(m => m.id.replace(/^opencode\//, "")));
+        return models.map(toProviderModel);
+    };
+    const initial = freeModels();
+    let latestModels = initial ? convert(initial) : undefined;
     pi.registerProvider(PROVIDER_ID, {
         name: "OpenCode Direct HTTP (Free)",
         baseUrl: BASE_URL,
-        // Placeholder: Pi's auth composition requires a key; real requests go
-        // keyless via the streamSimple shim below.
+        // Placeholder for Pi's auth composition; the free-tier wrapper supplies
+        // the public identifier on actual requests.
         apiKey: "none",
         api: "openai-completions",
         headers: {
             "x-opencode-client": "cli",
             "x-opencode-project": "global",
             "User-Agent": "opencode/1.18.31 ai-sdk/provider-utils/4.0.40 runtime/bun/1.3.14",
-            // Authorization is suppressed per request in streamSimple. A null value
-            // cannot live in provider config because Pi resolves config headers while
-            // refreshing catalogs and expects every configured value to be a string.
+            // Public Authorization is supplied per request in streamSimple.
         },
-        models: FALLBACK_MODEL_IDS.map((id) => toProviderModel({
-            id: `opencode/${id}`,
-            name: `${id} (Free)`,
-            reasoning: false,
-            contextWindow: 128_000,
-            maxTokens: 16_384,
-            api: id.startsWith("muse-spark-") ? "openai-responses" : undefined,
-        })),
+        models: latestModels ?? [],
         async refreshModels(ctx) {
-            if (!ctx.allowNetwork) {
+            if (!ctx.allowNetwork || process.env.PI_OFFLINE !== undefined) {
+                if (latestModels)
+                    return latestModels;
                 const stored = ctx.stored?.models
                     .filter(m => m.provider === PROVIDER_ID && (m.api === "openai-completions" || m.api === "openai-responses"))
                     .map(fromStoredModel) ?? [];
-                return stored.length > 0 ? stored : FALLBACK_MODEL_IDS.map((id) => toProviderModel({
-                    id: `opencode/${id}`,
-                    name: `${id} (Free)`,
-                    reasoning: false,
-                    contextWindow: 128_000,
-                    maxTokens: 16_384,
-                    api: id.startsWith("muse-spark-") ? "openai-responses" : undefined,
-                }));
+                responseIds = new Set(stored.filter(m => m.api === "openai-responses").map(m => m.id));
+                latestModels = stored.map(m => ({ ...m, api: "openai-completions" }));
+                return latestModels;
             }
             if (ctx.signal.aborted)
                 return [];
-            const discovered = await discoverModels({ signal: ctx.signal });
-            if (discovered.length === 0)
-                return []; // keep previous snapshot; retry on next refresh
+            await discovery.refresh(ctx.force, ctx.signal);
+            if (ctx.signal.aborted)
+                return latestModels ?? [];
+            const discovered = freeModels();
+            if (!discovered)
+                throw new Error("Cannot refresh OpenCode Zen free catalog; keeping the last known models.");
             const configs = discovered.map(toProviderModel);
-            await ctx.publish({ persist: { models: configs.map(toStoredModel), checkedAt: Date.now() } });
+            const persisted = configs.map((config, i) => ({
+                ...toStoredModel(config), api: discovered[i]?.api === "openai-responses" ? "openai-responses" : config.api,
+            }));
+            const published = await ctx.publish({ persist: { models: persisted, checkedAt: discovery.current().zen.checkedAt } });
+            if (published)
+                latestModels = convert(discovered);
             return configs;
         },
-        // Keyless shim over pi's native engines, dispatched by model API:
-        // Zen's free tier rejects every Bearer token with 401, and
-        // `Authorization: null` is the OpenAI SDK's supported omission.
+        // Public free-tier shim over Pi's native engines, dispatched by upstream API.
         // Streaming, tools, reasoning, and cost handling stay fully native.
         streamSimple: (model, context, options) => {
-            const responsesOnly = model.id.startsWith("muse-spark-");
+            const responsesOnly = responseIds.has(model.id) || model.id.startsWith("muse-spark-");
             const native = responsesOnly
                 ? nativeOpenAIResponsesStream
                 : nativeOpenAICompletionsStream;
@@ -178,5 +173,11 @@ export default function opencodeDirectExtension(pi) {
             });
         },
     });
+    for (const provider of builtinProviders()) {
+        if (provider.id === "opencode" || provider.id === "opencode-go") {
+            pi.registerProvider(withOpenCodeCatalog(provider, provider.id === "opencode-go" ? "go" : "zen", discovery));
+        }
+    }
+    installAutoRefresh(pi);
 }
 //# sourceMappingURL=index.js.map

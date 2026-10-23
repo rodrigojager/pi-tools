@@ -4,3 +4,5 @@ AGENTS.md
 .pi/
 *.tgz
 plans/
+dist/*.map
+dist/*.test.*
