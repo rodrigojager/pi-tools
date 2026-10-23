@@ -1,0 +1,19 @@
+{
+  "name": "@rodrigojager/pi-goal-auto-approve",
+  "version": "0.1.0",
+  "description": "Automatically approve Pi extension confirmations only while a user-authorized goal is active.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rodrigojager/pi-goal-auto-approve.git"
+  },
+  "bugs": "https://github.com/rodrigojager/pi-goal-auto-approve/issues",
+  "homepage": "https://github.com/rodrigojager/pi-goal-auto-approve#readme",
+  "keywords": ["pi-package", "pi", "goal", "approvals"],
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=1.0.0"
+  }
+}
