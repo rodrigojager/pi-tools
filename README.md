@@ -34,4 +34,4 @@ A read-only archive of Rodrigo Jager's Pi Coding Agent projects. Each project ke
 - Original branches are available as `archive/<project>/<branch>` and tags as `archive/<project>/<tag>`. Each ref retains its original Git object ID.
 - Each GitHub record includes the original repository metadata, ref mapping, and recorded releases. Downloadable release files live under `archive/<project>/releases/<release-id>/`. The corresponding GitHub record lists their paths and SHA-256 checksums.
 - The open `opencode-pi` pull request is preserved as a patch, conversation record, and `review/opencode-pi/1` branch. GitHub review and fork relationships belong to the original repository.
-- With access to this private archive, clone it to browse the original files and use each project's own setup instructions. Git install and update URLs for standalone repositories are not redirected here.
+- Clone this public archive to browse the original files and use each project's own setup instructions. Git install and update URLs for standalone repositories are not redirected here.
