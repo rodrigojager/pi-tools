@@ -1,0 +1,54 @@
+{
+  "name": "pi-check-agent-quota",
+  "version": "0.2.1",
+  "description": "Show AI provider quota and balance in the pi TUI status widget",
+  "keywords": [
+    "pi",
+    "pi-package",
+    "extension",
+    "quota",
+    "balance",
+    "tui",
+    "minimax",
+    "kimi",
+    "glm",
+    "deepseek",
+    "openrouter",
+    "openai-codex",
+    "chatgpt",
+    "oauth"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rodrigojager/pi-check-agent-quota.git"
+  },
+  "homepage": "https://github.com/rodrigojager/pi-check-agent-quota/blob/main/README_EN.md",
+  "type": "module",
+  "files": [
+    "extensions",
+    "README.md",
+    "README_EN.md"
+  ],
+  "engines": {
+    "node": ">=23.6"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions/index.ts"
+    ],
+    "image": "https://raw.githubusercontent.com/Linen9/pi-check-agent-quota/main/assets/screenshot-en.png"
+  },
+  "main": "extensions/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck && node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.19",
+    "typescript": "^5.9.3"
+  }
+}

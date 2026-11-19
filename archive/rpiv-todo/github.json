@@ -1,0 +1,162 @@
+{
+  "repository": {
+    "id": 1402385578,
+    "full_name": "rodrigojager/rpiv-todo",
+    "html_url": "https://github.com/rodrigojager/rpiv-todo",
+    "description": "Rodrigo standalone copy of rpiv-todo with official-todo history compatibility",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-02T21:43:42Z",
+    "pushed_at": "2026-10-02T21:44:50Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": []
+  },
+  "default_commit": "54febb0b87b335eda924a7bfa62babc1eb4d19cc",
+  "default_tree": "a4849d804918746c40b7ddf72667e7bb7dbf7839",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "54febb0b87b335eda924a7bfa62babc1eb4d19cc",
+      "archive_ref": "refs/heads/archive/rpiv-todo/main"
+    },
+    "refs/tags/upstream-v2.12.0": {
+      "sha": "67069ab6e8e7c4859bc5d4a971df60050a7742d8",
+      "archive_ref": "refs/tags/archive/rpiv-todo/upstream-v2.12.0"
+    },
+    "refs/tags/v2.12.0-rodrigo.1": {
+      "sha": "b743953598cbd823131feb57671bd25aef0dc77d",
+      "archive_ref": "refs/tags/archive/rpiv-todo/v2.12.0-rodrigo.1"
+    }
+  },
+  "releases": [
+    {
+      "url": "https://api.github.com/repos/rodrigojager/rpiv-todo/releases/402176338",
+      "assets_url": "https://api.github.com/repos/rodrigojager/rpiv-todo/releases/402176338/assets",
+      "upload_url": "https://uploads.github.com/repos/rodrigojager/rpiv-todo/releases/402176338/assets{?name,label}",
+      "html_url": "https://github.com/rodrigojager/rpiv-todo/releases/tag/v2.12.0-rodrigo.1",
+      "id": 402176338,
+      "author": {
+        "login": "rodrigojager",
+        "id": 49778489,
+        "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+        "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/rodrigojager",
+        "html_url": "https://github.com/rodrigojager",
+        "followers_url": "https://api.github.com/users/rodrigojager/followers",
+        "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+        "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+        "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+        "repos_url": "https://api.github.com/users/rodrigojager/repos",
+        "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "node_id": "RE_kwDOU5a0qs4X-LlS",
+      "tag_name": "v2.12.0-rodrigo.1",
+      "target_commitish": "main",
+      "name": "v2.12.0-rodrigo.1 — recuperação de listas antigas",
+      "draft": false,
+      "immutable": false,
+      "prerelease": false,
+      "created_at": "2026-10-02T21:42:41Z",
+      "updated_at": "2026-10-02T21:46:14Z",
+      "published_at": "2026-10-02T21:46:14Z",
+      "assets": [
+        {
+          "url": "https://api.github.com/repos/rodrigojager/rpiv-todo/releases/assets/606550837",
+          "id": 606550837,
+          "node_id": "RA_kwDOU5a0qs4kJzs1",
+          "name": "juicesharp-rpiv-todo-2.12.0-rodrigo.1.tgz",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/x-gtar",
+          "state": "uploaded",
+          "size": 35376,
+          "digest": "sha256:ab2e182e9ac21b9d163730fd3eb09e1e215d1c599e6004ca4ec53a38f5abf218",
+          "download_count": 0,
+          "created_at": "2026-10-02T21:46:14Z",
+          "updated_at": "2026-10-02T21:46:14Z",
+          "browser_download_url": "https://github.com/rodrigojager/rpiv-todo/releases/download/v2.12.0-rodrigo.1/juicesharp-rpiv-todo-2.12.0-rodrigo.1.tgz",
+          "archive_path": "archive/rpiv-todo/releases/402176338/juicesharp-rpiv-todo-2.12.0-rodrigo.1.tgz",
+          "archive_sha256": "ab2e182e9ac21b9d163730fd3eb09e1e215d1c599e6004ca4ec53a38f5abf218"
+        },
+        {
+          "url": "https://api.github.com/repos/rodrigojager/rpiv-todo/releases/assets/606550841",
+          "id": 606550841,
+          "node_id": "RA_kwDOU5a0qs4kJzs5",
+          "name": "juicesharp-rpiv-todo-2.12.0-rodrigo.1.tgz.sha256",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/octet-stream",
+          "state": "uploaded",
+          "size": 109,
+          "digest": "sha256:4e6708fd8ecd9f4f52ebb25483a099e89180a89e8e390a1dcd49818bc2420d1c",
+          "download_count": 0,
+          "created_at": "2026-10-02T21:46:14Z",
+          "updated_at": "2026-10-02T21:46:14Z",
+          "browser_download_url": "https://github.com/rodrigojager/rpiv-todo/releases/download/v2.12.0-rodrigo.1/juicesharp-rpiv-todo-2.12.0-rodrigo.1.tgz.sha256",
+          "archive_path": "archive/rpiv-todo/releases/402176338/juicesharp-rpiv-todo-2.12.0-rodrigo.1.tgz.sha256",
+          "archive_sha256": "4e6708fd8ecd9f4f52ebb25483a099e89180a89e8e390a1dcd49818bc2420d1c"
+        }
+      ],
+      "tarball_url": "https://api.github.com/repos/rodrigojager/rpiv-todo/tarball/v2.12.0-rodrigo.1",
+      "zipball_url": "https://api.github.com/repos/rodrigojager/rpiv-todo/zipball/v2.12.0-rodrigo.1",
+      "body": "# Cópia independente de Rodrigo — rpiv-todo\n\nBase: pacote npm **@juicesharp/rpiv-todo 2.12.0**, de\n[juicesharp/rpiv-mono](https://github.com/juicesharp/rpiv-mono/tree/main/packages/rpiv-todo).\nO primeiro commit preserva os arquivos do pacote original; o commit seguinte contém\nas adaptações. Esta é uma cópia independente do pacote, não um fork GitHub do monorepo.\nAutor e licença MIT originais foram mantidos.\n\n## 2.12.0-rodrigo.1 — 2026-10-02\n\n- `state/replay.ts`: aceita snapshots da extensão oficial anterior (`todos`, `text`,\n  `done`) e converte em memória para `tasks`, `subject` e `status`.\n- Preserva IDs, conclusão e próximo ID; corrige um contador antigo menor que o\n  maior ID. Não reescreve os arquivos de sessão.\n- Usa o último snapshot válido, incluindo listas vazias e históricos mistos.\n  Registros antigos malformados são ignorados.\n- `package.json`: versão própria, `private: true`, links desta cópia e testes\n  reproduzíveis. O nome original do pacote e a ferramenta `todo` permanecem.\n- Testes: migração sem mutação, replay misto, novo item após migração,\n  validação de ciclos de dependências e isolamento entre sessões.\n\nO painel, reducer, schemas e regras de transição do upstream permanecem iguais.\nUm item concluído continua sem poder voltar a `in_progress`.\n\nInstalação, após terminar a sessão atual:\n\n```powershell\npi install https://github.com/rodrigojager/rpiv-todo@v2.12.0-rodrigo.1\npi install npm:@juicesharp/rpiv-i18n@2.12.0\n```\n\nDesative a extensão anterior `official-todo.ts` e qualquer outra fonte do `todo`.\nA configuração compartilhada da sidebar e do Herdr está no\n[perfil do Pi Home Kit](https://github.com/rodrigojager/pi-home-kit/tree/main/profiles/2026-10-02-ui).\n"
+    }
+  ],
+  "issues": [],
+  "pull_requests": []
+}

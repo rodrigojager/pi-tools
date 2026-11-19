@@ -1,0 +1,132 @@
+{
+  "repository": {
+    "id": 1376229240,
+    "full_name": "rodrigojager/pi-extensions",
+    "html_url": "https://github.com/rodrigojager/pi-extensions",
+    "description": "Collection of extensions and themes for Pi Coding Agent",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-09-18T17:45:09Z",
+    "pushed_at": "2026-09-18T10:29:57Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": [],
+    "parent": {
+      "full_name": "luongnv89/pi-extensions",
+      "html_url": "https://github.com/luongnv89/pi-extensions",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "luongnv89/pi-extensions",
+      "html_url": "https://github.com/luongnv89/pi-extensions",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "2746e58cad3bcd866b7c0bd0a4e940fdd2335e15",
+  "default_tree": "e2c9d1e601448695d34c9c74647f4031d34164c0",
+  "git_refs": {
+    "refs/heads/add-hermes-agent-theme": {
+      "sha": "538ab5c73efcc1c6ed6e2233b7bc2c02bbbce617",
+      "archive_ref": "refs/heads/archive/pi-extensions/add-hermes-agent-theme"
+    },
+    "refs/heads/claude-code-pi-thinking-images-context": {
+      "sha": "09f0c64c4daab61b992f31f3e415b99488be77ca",
+      "archive_ref": "refs/heads/archive/pi-extensions/claude-code-pi-thinking-images-context"
+    },
+    "refs/heads/docs/add-screenshots-to-readmes": {
+      "sha": "8f5b0a4693d50804d698575170dc2986d0101dec",
+      "archive_ref": "refs/heads/archive/pi-extensions/docs/add-screenshots-to-readmes"
+    },
+    "refs/heads/docs/cli-bridge-tos-analysis": {
+      "sha": "53373ffee9ead06a0ac394ccdfee7fd511aa9104",
+      "archive_ref": "refs/heads/archive/pi-extensions/docs/cli-bridge-tos-analysis"
+    },
+    "refs/heads/feat/29-subagent-management-extension": {
+      "sha": "2327f397c64d795da3f6a76e8f218c264547a9b2",
+      "archive_ref": "refs/heads/archive/pi-extensions/feat/29-subagent-management-extension"
+    },
+    "refs/heads/feat/53-add-harness-environment-checks-to": {
+      "sha": "0f46dffb54623f342c9551122e92032750b7abc6",
+      "archive_ref": "refs/heads/archive/pi-extensions/feat/53-add-harness-environment-checks-to"
+    },
+    "refs/heads/feat/61-notify-when-gpt-context-reaches-272k": {
+      "sha": "dff649605409ccdfc2d734a9b7e1c54c8fa8b7bd",
+      "archive_ref": "refs/heads/archive/pi-extensions/feat/61-notify-when-gpt-context-reaches-272k"
+    },
+    "refs/heads/feat/add-agy-hermes-timestamp-extensions": {
+      "sha": "12fb009202c4db312feffb22c6344f0efb7cd5a4",
+      "archive_ref": "refs/heads/archive/pi-extensions/feat/add-agy-hermes-timestamp-extensions"
+    },
+    "refs/heads/feat/doc-manager": {
+      "sha": "17ae9ecbd910d982769e1a4be58d931486294b8d",
+      "archive_ref": "refs/heads/archive/pi-extensions/feat/doc-manager"
+    },
+    "refs/heads/feat/zed-themes": {
+      "sha": "694f37dd6ed456971503554e559c6e205a74a3b6",
+      "archive_ref": "refs/heads/archive/pi-extensions/feat/zed-themes"
+    },
+    "refs/heads/fix/100-originating-model-cost": {
+      "sha": "3e8f3d040ff880e0a1cec0b1b733d5d2d3d2f141",
+      "archive_ref": "refs/heads/archive/pi-extensions/fix/100-originating-model-cost"
+    },
+    "refs/heads/improvement/15-statusline-narrow-layout": {
+      "sha": "e8d275e5d78cff725b99072c5e409067c317e551",
+      "archive_ref": "refs/heads/archive/pi-extensions/improvement/15-statusline-narrow-layout"
+    },
+    "refs/heads/main": {
+      "sha": "2746e58cad3bcd866b7c0bd0a4e940fdd2335e15",
+      "archive_ref": "refs/heads/archive/pi-extensions/main"
+    },
+    "refs/tags/advisor-pi@1.1.0": {
+      "sha": "93d28f85cb7a700d8855eb74f0cbf79d76c9db8b",
+      "archive_ref": "refs/tags/archive/pi-extensions/advisor-pi@1.1.0"
+    },
+    "refs/tags/agy-pi@0.2.1": {
+      "sha": "c81d5d4a5a701f4fde85b80ab8069a5c1859b177",
+      "archive_ref": "refs/tags/archive/pi-extensions/agy-pi@0.2.1"
+    },
+    "refs/tags/cache-warm@0.2.0": {
+      "sha": "d0ec761be969eb2916863743acdce2c2c91f80bd",
+      "archive_ref": "refs/tags/archive/pi-extensions/cache-warm@0.2.0"
+    },
+    "refs/tags/grok-pi@1.4.3": {
+      "sha": "ac442b7f558ae5da0de50a8f24399ed177c52f53",
+      "archive_ref": "refs/tags/archive/pi-extensions/grok-pi@1.4.3"
+    },
+    "refs/tags/statusline-pi@1.3.0": {
+      "sha": "d272f99c2115cd8e2baa657e94bd4797e8fa0b78",
+      "archive_ref": "refs/tags/archive/pi-extensions/statusline-pi@1.3.0"
+    },
+    "refs/tags/statusline-pi@1.3.1": {
+      "sha": "9648180981b64234fcd9e1ce2c1497b45c36eecb",
+      "archive_ref": "refs/tags/archive/pi-extensions/statusline-pi@1.3.1"
+    },
+    "refs/tags/timestamp-pi@0.2.1": {
+      "sha": "49220204100c554268057e8180406abc1b4b6b0d",
+      "archive_ref": "refs/tags/archive/pi-extensions/timestamp-pi@0.2.1"
+    },
+    "refs/tags/v0.1.0": {
+      "sha": "4f50340d8c9847cf47808aceba81c03e48a6606c",
+      "archive_ref": "refs/tags/archive/pi-extensions/v0.1.0"
+    },
+    "refs/tags/v0.2.0": {
+      "sha": "d4c610d61adfdd2644290b37b882d12fb67bb091",
+      "archive_ref": "refs/tags/archive/pi-extensions/v0.2.0"
+    },
+    "refs/tags/v1.4.2": {
+      "sha": "2026e136e608f8c82eb714b219ebcbd7bf51230e",
+      "archive_ref": "refs/tags/archive/pi-extensions/v1.4.2"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-09-18",
+  "piVersion": "0.85.1",
+  "customRepositories": {
+    "pi-codex-account-pool": "e35a651",
+    "pi-check-agent-quota": "412a2ab",
+    "pi-opencode-direct": "f9a48ca",
+    "opencode-pi": "ce84901",
+    "pi-guardian": "94d3983"
+  },
+  "notes": [
+    "No OAuth tokens or auth.json files are included.",
+    "Codex accounts must be added again on each machine.",
+    "Guardian state is personal configuration and is documented instead of copied.",
+    "No global skills are bundled; none were installed as part of this setup."
+  ]
+}

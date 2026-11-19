@@ -1,0 +1,532 @@
+{
+  "repository": {
+    "id": 1406161864,
+    "full_name": "rodrigojager/rpiv-mono",
+    "html_url": "https://github.com/rodrigojager/rpiv-mono",
+    "description": "Monorepo for @juicesharp/rpiv-* Pi plugins (lockstep versions, single install, single publish pipeline)",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-05T17:39:49Z",
+    "pushed_at": "2026-10-06T04:26:58Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": [],
+    "parent": {
+      "full_name": "juicesharp/rpiv-mono",
+      "html_url": "https://github.com/juicesharp/rpiv-mono",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "juicesharp/rpiv-mono",
+      "html_url": "https://github.com/juicesharp/rpiv-mono",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "d9513b10e4a3cd034f94243260b738d6ea3b2c22",
+  "default_tree": "ab45cd1236149fd7158bb78215b7899068d03243",
+  "git_refs": {
+    "refs/heads/badges": {
+      "sha": "93e8c249aed78cdfaa6c1bfa49ebf37c7beabfb3",
+      "archive_ref": "refs/heads/archive/rpiv-mono/badges"
+    },
+    "refs/heads/dependabot/github_actions/github-actions-b9e8c4591a": {
+      "sha": "da3981573148fddd22c516e49a4e81d54d113829",
+      "archive_ref": "refs/heads/archive/rpiv-mono/dependabot/github_actions/github-actions-b9e8c4591a"
+    },
+    "refs/heads/main": {
+      "sha": "d9513b10e4a3cd034f94243260b738d6ea3b2c22",
+      "archive_ref": "refs/heads/archive/rpiv-mono/main"
+    },
+    "refs/tags/v0.10.0": {
+      "sha": "dd1d78402f00bb08ab90b63f2597c0d9e4954385",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.10.0"
+    },
+    "refs/tags/v0.11.0": {
+      "sha": "f812ee79266ed5e09cefc9516d11970e5b4da8bc",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.11.0"
+    },
+    "refs/tags/v0.11.1": {
+      "sha": "dbaeb732f24dbc40c59e73806649c5fbd3109f5d",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.11.1"
+    },
+    "refs/tags/v0.11.3": {
+      "sha": "9d665aca402648d338cf66369f8329f1684a4c8f",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.11.3"
+    },
+    "refs/tags/v0.11.4": {
+      "sha": "33ff01563f4a26c54e79299e50d66dac7a08b8c1",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.11.4"
+    },
+    "refs/tags/v0.11.5": {
+      "sha": "3801b988591d1f8cfcb74c55c212aedbe24e0483",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.11.5"
+    },
+    "refs/tags/v0.11.6": {
+      "sha": "b1210334a4613c49a0667388aaa6642c841d34a1",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.11.6"
+    },
+    "refs/tags/v0.11.7": {
+      "sha": "641545f87edca980399cb0289e18b87786ef60c7",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.11.7"
+    },
+    "refs/tags/v0.12.0": {
+      "sha": "503b4941d8e6dc67977dd128eb6c75f6f2b1fca0",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.0"
+    },
+    "refs/tags/v0.12.1": {
+      "sha": "1c196a18b7ebd1b285566e66534ba831fe906e1b",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.1"
+    },
+    "refs/tags/v0.12.2": {
+      "sha": "bcf860df86a3b7830514cc99e2f085909c0cb611",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.2"
+    },
+    "refs/tags/v0.12.3": {
+      "sha": "0e80de488a99db72314fb22c0f3441a68eb41fae",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.3"
+    },
+    "refs/tags/v0.12.4": {
+      "sha": "813cc8b78117c664e6605b2cbc18f9bd34503ee7",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.4"
+    },
+    "refs/tags/v0.12.5": {
+      "sha": "60d211239f6b30cd3bf96084d23a8d1ae7b48b81",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.5"
+    },
+    "refs/tags/v0.12.6": {
+      "sha": "197c19927080cf090f5780a3a9ac3cc437aeb31e",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.6"
+    },
+    "refs/tags/v0.12.7": {
+      "sha": "4a14afd2417d9e2477f3ce42cc3acc937db4dac1",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.12.7"
+    },
+    "refs/tags/v0.13.0": {
+      "sha": "5dc535fce0a760e8be9b4f5748c08d2c2a96aee9",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.13.0"
+    },
+    "refs/tags/v0.13.1": {
+      "sha": "4328f420554146d4f5989d6155e368267eefaaca",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.13.1"
+    },
+    "refs/tags/v0.13.3": {
+      "sha": "5284b898d8fe3126fea19b8e2014c4f7f470d04c",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.13.3"
+    },
+    "refs/tags/v0.6.1": {
+      "sha": "bef0222970f5af7fc8ad5242552effaa1a8b6c14",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.6.1"
+    },
+    "refs/tags/v0.7.0": {
+      "sha": "0af2447f7e78e55bd4b46bc3ed87c9c3c58f4106",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.7.0"
+    },
+    "refs/tags/v0.8.0": {
+      "sha": "df058b9f825d7c1d0c93c8544acecfe3bdfd4d31",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.8.0"
+    },
+    "refs/tags/v0.8.1": {
+      "sha": "7444f2b413065586d4976bf45cdf470b96e92c1e",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.8.1"
+    },
+    "refs/tags/v0.8.2": {
+      "sha": "77834a14bcd4ae84a6dfaca9c87f1433a83ac613",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.8.2"
+    },
+    "refs/tags/v0.8.3": {
+      "sha": "2de78d16d5f17f1fe5a82b5cd6a56392452ac826",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.8.3"
+    },
+    "refs/tags/v0.9.0": {
+      "sha": "f56f954e59217628a7548a347cf1fc728e1786ba",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.9.0"
+    },
+    "refs/tags/v0.9.1": {
+      "sha": "ee055e7d43eb414b742ddefb067295fd60d6ed3c",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v0.9.1"
+    },
+    "refs/tags/v1.0.0": {
+      "sha": "d177214295b0439b15324e07bbec5bd039dfa8ea",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.0"
+    },
+    "refs/tags/v1.0.1": {
+      "sha": "899e41cb2bd65d9851e07415b40edcce85623fbd",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.1"
+    },
+    "refs/tags/v1.0.10": {
+      "sha": "95efd3fc3f6fc95cf49850e757a4f058bb15c46a",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.10"
+    },
+    "refs/tags/v1.0.11": {
+      "sha": "d867209829ea7b861832954d6ea8c4bee51f2e69",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.11"
+    },
+    "refs/tags/v1.0.12": {
+      "sha": "ddb4ecd2392e0c32a95995fb0a10291fc6653377",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.12"
+    },
+    "refs/tags/v1.0.13": {
+      "sha": "bbca20d357b8360402a7b6163f70a8fed9fe5e36",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.13"
+    },
+    "refs/tags/v1.0.14": {
+      "sha": "d49757661dc4b2d7c5a097f414dac64ac5d3518a",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.14"
+    },
+    "refs/tags/v1.0.15": {
+      "sha": "04e8025f582cd693350045cb9c3c52394de7b9c0",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.15"
+    },
+    "refs/tags/v1.0.16": {
+      "sha": "f83373cb9cf3277da92afc2a782c77e74af6a8b2",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.16"
+    },
+    "refs/tags/v1.0.17": {
+      "sha": "ded50aae4eba0b45c8ba8506582e59c57731f2df",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.17"
+    },
+    "refs/tags/v1.0.18": {
+      "sha": "0373bb7fad7151344631a3db1651f16d7286eb8b",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.18"
+    },
+    "refs/tags/v1.0.19": {
+      "sha": "65319dd5a3d791e48cc894eaadab049e7722df52",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.19"
+    },
+    "refs/tags/v1.0.2": {
+      "sha": "c768e903aec6d141e62d90e31873ea4d42c06549",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.2"
+    },
+    "refs/tags/v1.0.3": {
+      "sha": "2b9da46d03a8076ddb1d5e273807663ac4b49fd7",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.3"
+    },
+    "refs/tags/v1.0.4": {
+      "sha": "3d9e920e6452de31dc1f82f4f6511f5d345c21bc",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.4"
+    },
+    "refs/tags/v1.0.5": {
+      "sha": "e72a894ef84b1ac8749115f0dd199fb6fa79c032",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.5"
+    },
+    "refs/tags/v1.0.6": {
+      "sha": "ca15319a8007319189cd18f47dd05071e3d0134d",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.6"
+    },
+    "refs/tags/v1.0.7": {
+      "sha": "cb8a7a7647cf7f48c37f83747854527d11f46fe9",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.7"
+    },
+    "refs/tags/v1.0.8": {
+      "sha": "221ea14dae82ba3fed942e1845f68836a42316ad",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.8"
+    },
+    "refs/tags/v1.0.9": {
+      "sha": "3eb8201dfe6f0de39836778fdda42f6d6af13101",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.0.9"
+    },
+    "refs/tags/v1.1.0": {
+      "sha": "b0bf97cb7549df11697245fa1e78e622d8cdcfa6",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.1.0"
+    },
+    "refs/tags/v1.1.1": {
+      "sha": "31ed918276651676f2a6a79a30ff29641c2f98c3",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.1.1"
+    },
+    "refs/tags/v1.1.2": {
+      "sha": "3612a265d516bef333c5f52638ed24791dd3f558",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.1.2"
+    },
+    "refs/tags/v1.1.3": {
+      "sha": "102efb2608601e2c913a12fea7a8ad43a8d4adbd",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.1.3"
+    },
+    "refs/tags/v1.1.4": {
+      "sha": "651192fbb675e1a1112d0983390a2957467e2b7f",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.1.4"
+    },
+    "refs/tags/v1.1.5": {
+      "sha": "94b90664a8ba60c8d05758a9911115b86e525b2c",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.1.5"
+    },
+    "refs/tags/v1.10.0": {
+      "sha": "af7b85dbd9193fee8e670452fa447afb0fe76815",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.10.0"
+    },
+    "refs/tags/v1.10.1": {
+      "sha": "ccc209e30778c683f7fe9c5bd448fdf9d11f8bca",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.10.1"
+    },
+    "refs/tags/v1.10.2": {
+      "sha": "41839b247d9c97f70ffa47f6335801fac2545553",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.10.2"
+    },
+    "refs/tags/v1.11.0": {
+      "sha": "1c3e4da5d64055f742a183f97fc21368c7ce9701",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.11.0"
+    },
+    "refs/tags/v1.12.0": {
+      "sha": "c1df0a5ccf4422785c3d73ec92aabaaf29e4a9be",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.12.0"
+    },
+    "refs/tags/v1.13.0": {
+      "sha": "f6c48f742d0482af6321d89e45b11346191b1f85",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.13.0"
+    },
+    "refs/tags/v1.14.0": {
+      "sha": "3e2fcb71c3c76a18836c25a3c04f58808f1d5244",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.0"
+    },
+    "refs/tags/v1.14.1": {
+      "sha": "c652a568e9dd9d77ac45fdeae2356e6c346f0c19",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.1"
+    },
+    "refs/tags/v1.14.2": {
+      "sha": "ec2d3f7e35ca22818c380b82fb10b3f6b43829a2",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.2"
+    },
+    "refs/tags/v1.14.3": {
+      "sha": "c3909569607061dc965117fe67c70e016201615d",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.3"
+    },
+    "refs/tags/v1.14.4": {
+      "sha": "23b060a2b0b35fb0be3e468531db97d549b72d37",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.4"
+    },
+    "refs/tags/v1.14.5": {
+      "sha": "09727e03e7f71f1e32240aa3a7ad9c1adc8118fa",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.5"
+    },
+    "refs/tags/v1.14.6": {
+      "sha": "7b37f0355acb37172d1824a2d67618d38e20522c",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.6"
+    },
+    "refs/tags/v1.14.7": {
+      "sha": "06749fbec788177662902f8b09aaf8edabada93d",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.14.7"
+    },
+    "refs/tags/v1.15.0": {
+      "sha": "77ce584cb0719fd038719db116a921b2178e8fc8",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.15.0"
+    },
+    "refs/tags/v1.16.0": {
+      "sha": "b257b64e321d4ba26041999490752f28db5ecf94",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.16.0"
+    },
+    "refs/tags/v1.16.1": {
+      "sha": "c17351d1c471fe2a377f3a613274898e9eeb27a0",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.16.1"
+    },
+    "refs/tags/v1.17.0": {
+      "sha": "88e7bd31296bf105ad0d01c8e3e4b546333ffb2d",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.17.0"
+    },
+    "refs/tags/v1.17.1": {
+      "sha": "8a8857f6dbba56fe316993660ee8f80fb6f42f5d",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.17.1"
+    },
+    "refs/tags/v1.18.0": {
+      "sha": "a0c9a847e9f716cd034e26ebea209cdd036af86b",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.18.0"
+    },
+    "refs/tags/v1.18.1": {
+      "sha": "82e205467a744728a192906f33a916b066333b04",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.18.1"
+    },
+    "refs/tags/v1.18.2": {
+      "sha": "67e7af38f60a6c97f6cc282e5727533c9c0df571",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.18.2"
+    },
+    "refs/tags/v1.19.0": {
+      "sha": "b886b9c51812baa2d9559a6e65fb96d8944ee3dc",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.19.0"
+    },
+    "refs/tags/v1.19.1": {
+      "sha": "0ab930cb0f4574b577e110c18834b2926d6dc79a",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.19.1"
+    },
+    "refs/tags/v1.2.0": {
+      "sha": "c265d6b10a1bb8483809a24ffb28ae6a6a49ff5e",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.2.0"
+    },
+    "refs/tags/v1.2.1": {
+      "sha": "ab67ca43eb4925bcb4131a0c363b0bdaa9cd1ec3",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.2.1"
+    },
+    "refs/tags/v1.20.0": {
+      "sha": "060373d9292aeb46aeedc23a6d818a997200a6e5",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.20.0"
+    },
+    "refs/tags/v1.3.0": {
+      "sha": "56b6592f774081275b6adecfe8c24db32bf9fc05",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.3.0"
+    },
+    "refs/tags/v1.3.1": {
+      "sha": "800c6d7c874838d00815fa4dc5d57eb0cd79d29c",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.3.1"
+    },
+    "refs/tags/v1.4.0": {
+      "sha": "d2f8f791dca7ea26fec4bcb770583e201ecf7908",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.4.0"
+    },
+    "refs/tags/v1.4.1": {
+      "sha": "82968f753f03f658e9a7e4656f3cb281b0100de4",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.4.1"
+    },
+    "refs/tags/v1.4.2": {
+      "sha": "02bb2bbec560ac8df63d82ca4f0b2cec30fe9a23",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.4.2"
+    },
+    "refs/tags/v1.5.0": {
+      "sha": "e8347eeacfeb87b80b09d6b35e6e8d92e8a86fa6",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.5.0"
+    },
+    "refs/tags/v1.5.1": {
+      "sha": "ef06ac512f0aba8753532830f64c1d869c67a1fc",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.5.1"
+    },
+    "refs/tags/v1.5.2": {
+      "sha": "4f28b8e234ceecce8026167b9012e3afbe995e19",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.5.2"
+    },
+    "refs/tags/v1.6.0": {
+      "sha": "f7990848d259759c4fcb2e8240b33ce3e1b79839",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.6.0"
+    },
+    "refs/tags/v1.6.1": {
+      "sha": "56dffa7342ab5d568e7d1cc99e3b1382283b5461",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.6.1"
+    },
+    "refs/tags/v1.7.0": {
+      "sha": "0e141de72968c1061faa1013469923198720ac5d",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.7.0"
+    },
+    "refs/tags/v1.8.0": {
+      "sha": "da06f9e070c22d5bbd8ff80f1b62c8cb48ae8426",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.8.0"
+    },
+    "refs/tags/v1.8.1": {
+      "sha": "441cf45e92660a4f6c10b03350dc1291dd7580e7",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.8.1"
+    },
+    "refs/tags/v1.8.2": {
+      "sha": "56c0f3f8bc08d0e3dc7ab1701186402be3faef04",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.8.2"
+    },
+    "refs/tags/v1.8.3": {
+      "sha": "49a70c412d54e6a63ed4f5509932288e489c6a7b",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.8.3"
+    },
+    "refs/tags/v1.9.0": {
+      "sha": "027651b74fa9287b72744cd7b2ad41da4fcae470",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.9.0"
+    },
+    "refs/tags/v1.9.1": {
+      "sha": "96bf3f0483aaf55e92f666cdcecc6b4ec1013b02",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.9.1"
+    },
+    "refs/tags/v1.9.2": {
+      "sha": "9b7fc2e8cc49970fc1b574464697c2aa76fe1cec",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v1.9.2"
+    },
+    "refs/tags/v2.0.0": {
+      "sha": "e2c9ed0eb1e71ac67c066fb9b197d07983c6924f",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.0.0"
+    },
+    "refs/tags/v2.1.0": {
+      "sha": "0e7c8e19c497667beaf64cfa0ca61748a8a503eb",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.1.0"
+    },
+    "refs/tags/v2.10.0": {
+      "sha": "51f613701fe3a76e0ec7fb05b0b092d0613f2c6f",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.10.0"
+    },
+    "refs/tags/v2.10.1": {
+      "sha": "42a272eb3363f18e072d71deccdbc27452bb0c45",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.10.1"
+    },
+    "refs/tags/v2.11.0": {
+      "sha": "61904e69e1a50e12585bdf15f0310e633a62ba36",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.11.0"
+    },
+    "refs/tags/v2.12.0": {
+      "sha": "7c9bc924c5bfd148f36d7ebc9f7bd0a9469d633f",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.12.0"
+    },
+    "refs/tags/v2.2.0": {
+      "sha": "8567ce713a7670da7a5456666a3be0adf80d2820",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.2.0"
+    },
+    "refs/tags/v2.3.0": {
+      "sha": "bc889e1f13989b4dc8316176db9900fdebd8ca4a",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.3.0"
+    },
+    "refs/tags/v2.3.1": {
+      "sha": "75823a68024a0a649cc28087976074be791ca554",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.3.1"
+    },
+    "refs/tags/v2.4.0": {
+      "sha": "a1531ed4207c21a00941c62571bc1bd3e386cfcb",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.4.0"
+    },
+    "refs/tags/v2.5.0": {
+      "sha": "cc03ff1363080558273b5e100539399663a57dc8",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.5.0"
+    },
+    "refs/tags/v2.5.1": {
+      "sha": "235ab331dafc9189070f150131e9e1ef7e4e9c34",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.5.1"
+    },
+    "refs/tags/v2.5.2": {
+      "sha": "1043c0dbc899d88ec280afcc590fef7080457160",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.5.2"
+    },
+    "refs/tags/v2.6.0": {
+      "sha": "43d6401e3c68cf335cd3dde395d18e25685d3539",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.6.0"
+    },
+    "refs/tags/v2.6.1": {
+      "sha": "fb7ac9d72f2daf410c3186b41abb54ca25a09984",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.6.1"
+    },
+    "refs/tags/v2.6.2": {
+      "sha": "8a6347d172797ac7a006bd867a84328df4c8f193",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.6.2"
+    },
+    "refs/tags/v2.6.3": {
+      "sha": "d8be102e8bb2cbfc7b5a082447ca18f2413c8c7c",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.6.3"
+    },
+    "refs/tags/v2.6.4": {
+      "sha": "22b661e3e04645cbdee03f1eefcfab78a2deee26",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.6.4"
+    },
+    "refs/tags/v2.7.0": {
+      "sha": "f595bb7a8515e884097fbe3dc0345984299a6163",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.7.0"
+    },
+    "refs/tags/v2.7.1": {
+      "sha": "3ae7bfbf7802ec9392a7d9228a30c82399a7f88b",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.7.1"
+    },
+    "refs/tags/v2.8.0": {
+      "sha": "bf3e8ae4c027a4fca18d1b4704f573bf550d30af",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.8.0"
+    },
+    "refs/tags/v2.9.0": {
+      "sha": "59100c75f256a004fe4bb0ce8eb6266d79f0791a",
+      "archive_ref": "refs/tags/archive/rpiv-mono/v2.9.0"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

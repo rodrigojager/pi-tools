@@ -1,0 +1,53 @@
+{
+  "name": "pi-herdr-status",
+  "version": "0.2.1-rodrigo.1",
+  "description": "Reports pi active model and status metadata to Herdr's sidebar agents panel without colliding with other extensions.",
+  "type": "module",
+  "license": "MIT",
+  "author": "dereknex",
+  "homepage": "https://github.com/rodrigojager/pi-herdr-status#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rodrigojager/pi-herdr-status.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rodrigojager/pi-herdr-status/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "herdr",
+    "sidebar",
+    "status",
+    "metadata"
+  ],
+  "files": [
+    "src",
+    "README.md",
+    "README_CN.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "package.json",
+    "LOCAL-CHANGES.md"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {},
+  "private": true
+}

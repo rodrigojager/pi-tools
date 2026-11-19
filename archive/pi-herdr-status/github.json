@@ -1,0 +1,162 @@
+{
+  "repository": {
+    "id": 1402385643,
+    "full_name": "rodrigojager/pi-herdr-status",
+    "html_url": "https://github.com/rodrigojager/pi-herdr-status",
+    "description": "Rodrigo metadata-only pi-herdr-status alongside official Herdr lifecycle integration",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-02T21:43:47Z",
+    "pushed_at": "2026-10-02T21:44:50Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": []
+  },
+  "default_commit": "599070467976c664b0a75a1ba269d1eb038c8f5e",
+  "default_tree": "afa56d4cd6384ac7bb5b561cd1ef928a8a0e4c58",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "599070467976c664b0a75a1ba269d1eb038c8f5e",
+      "archive_ref": "refs/heads/archive/pi-herdr-status/main"
+    },
+    "refs/tags/upstream-v0.2.1": {
+      "sha": "bd6b97e2963b55c6537da9f2b3d93a284cef1ed0",
+      "archive_ref": "refs/tags/archive/pi-herdr-status/upstream-v0.2.1"
+    },
+    "refs/tags/v0.2.1-rodrigo.1": {
+      "sha": "492b7fa708a7b1ad769e6863b2b5efe5d466cef6",
+      "archive_ref": "refs/tags/archive/pi-herdr-status/v0.2.1-rodrigo.1"
+    }
+  },
+  "releases": [
+    {
+      "url": "https://api.github.com/repos/rodrigojager/pi-herdr-status/releases/402176361",
+      "assets_url": "https://api.github.com/repos/rodrigojager/pi-herdr-status/releases/402176361/assets",
+      "upload_url": "https://uploads.github.com/repos/rodrigojager/pi-herdr-status/releases/402176361/assets{?name,label}",
+      "html_url": "https://github.com/rodrigojager/pi-herdr-status/releases/tag/v0.2.1-rodrigo.1",
+      "id": 402176361,
+      "author": {
+        "login": "rodrigojager",
+        "id": 49778489,
+        "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+        "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/rodrigojager",
+        "html_url": "https://github.com/rodrigojager",
+        "followers_url": "https://api.github.com/users/rodrigojager/followers",
+        "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+        "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+        "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+        "repos_url": "https://api.github.com/users/rodrigojager/repos",
+        "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "node_id": "RE_kwDOU5a0684X-Llp",
+      "tag_name": "v0.2.1-rodrigo.1",
+      "target_commitish": "main",
+      "name": "v0.2.1-rodrigo.1 — metadata do modelo no Herdr",
+      "draft": false,
+      "immutable": false,
+      "prerelease": false,
+      "created_at": "2026-10-02T21:42:11Z",
+      "updated_at": "2026-10-02T21:46:17Z",
+      "published_at": "2026-10-02T21:46:17Z",
+      "assets": [
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-herdr-status/releases/assets/606550962",
+          "id": 606550962,
+          "node_id": "RA_kwDOU5a0684kJzuy",
+          "name": "pi-herdr-status-0.2.1-rodrigo.1.tgz",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/x-gtar",
+          "state": "uploaded",
+          "size": 7106,
+          "digest": "sha256:1aa389936d3c87f7df0131b43b65f93ee42199bd57c099de20b93a378152bbe6",
+          "download_count": 1,
+          "created_at": "2026-10-02T21:46:17Z",
+          "updated_at": "2026-10-02T21:46:17Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-herdr-status/releases/download/v0.2.1-rodrigo.1/pi-herdr-status-0.2.1-rodrigo.1.tgz",
+          "archive_path": "archive/pi-herdr-status/releases/402176361/pi-herdr-status-0.2.1-rodrigo.1.tgz",
+          "archive_sha256": "1aa389936d3c87f7df0131b43b65f93ee42199bd57c099de20b93a378152bbe6"
+        },
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-herdr-status/releases/assets/606550965",
+          "id": 606550965,
+          "node_id": "RA_kwDOU5a0684kJzu1",
+          "name": "pi-herdr-status-0.2.1-rodrigo.1.tgz.sha256",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/octet-stream",
+          "state": "uploaded",
+          "size": 103,
+          "digest": "sha256:cfaae61d8a83a513c1c244075c7b451aa5215d5c9ecee09dad844c733fa7ff25",
+          "download_count": 1,
+          "created_at": "2026-10-02T21:46:17Z",
+          "updated_at": "2026-10-02T21:46:17Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-herdr-status/releases/download/v0.2.1-rodrigo.1/pi-herdr-status-0.2.1-rodrigo.1.tgz.sha256",
+          "archive_path": "archive/pi-herdr-status/releases/402176361/pi-herdr-status-0.2.1-rodrigo.1.tgz.sha256",
+          "archive_sha256": "cfaae61d8a83a513c1c244075c7b451aa5215d5c9ecee09dad844c733fa7ff25"
+        }
+      ],
+      "tarball_url": "https://api.github.com/repos/rodrigojager/pi-herdr-status/tarball/v0.2.1-rodrigo.1",
+      "zipball_url": "https://api.github.com/repos/rodrigojager/pi-herdr-status/zipball/v0.2.1-rodrigo.1",
+      "body": "# Cópia independente de Rodrigo — pi-herdr-status\n\nBase: pacote npm **pi-herdr-status 0.2.1**, de\n[dereknex/pi-extensions](https://github.com/dereknex/pi-extensions/tree/main/packages/pi-herdr-status).\nO primeiro commit preserva o pacote baixado; o seguinte mostra as alterações.\nEsta é uma cópia independente do pacote, não um fork GitHub do monorepo.\nAutor e licença MIT originais foram mantidos.\n\n## 0.2.1-rodrigo.1 — 2026-10-02\n\n- A função principal registra somente startup, troca de modelo, troca do nível\n  de raciocínio, início do turno e encerramento para atualizar `model_info`.\n- Deixa o ciclo de vida (`working`, `blocked`, `idle`) com a integração oficial\n  `herdr-agent-state.ts`. Não envolve nem substitui diálogos da UI.\n- Metadata usa `--source pi-model`, `--agent pi` e\n  `--applies-to-source herdr:pi`, com o ID do pane obrigatório.\n- Chamadas CLI permanecem em fila FIFO; agora têm timeout de 2 segundos,\n  janela oculta no Windows e limite de saída de 64 KiB.\n- Ignora processos filhos e contextos sem UI; limpa metadata no encerramento\n  real, preservando-a durante reload.\n- `package.json`: versão própria, `private: true`, links desta cópia e teste Node 26.\n\nOs helpers exportados de status e diálogos do upstream permanecem no arquivo por\ncompatibilidade, mas a função principal desta cópia não os utiliza.\n\nNo Herdr 0.9.2-preview instalado, o token personalizado na configuração precisa\nser **`$model_info`**, embora o nome enviado na CLI seja `model_info`.\n\n```powershell\npi install https://github.com/rodrigojager/pi-herdr-status@v0.2.1-rodrigo.1\n```\n\nUse apenas uma fonte deste plugin. O perfil e a configuração do Herdr estão no\n[Pi Home Kit](https://github.com/rodrigojager/pi-home-kit/tree/main/profiles/2026-10-02-ui).\n"
+    }
+  ],
+  "issues": [],
+  "pull_requests": []
+}

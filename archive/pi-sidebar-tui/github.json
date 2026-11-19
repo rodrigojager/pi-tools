@@ -1,0 +1,278 @@
+{
+  "repository": {
+    "id": 1379472397,
+    "full_name": "rodrigojager/pi-sidebar-tui",
+    "html_url": "https://github.com/rodrigojager/pi-sidebar-tui",
+    "description": null,
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-09-21T09:55:08Z",
+    "pushed_at": "2026-10-02T21:44:50Z",
+    "license": null,
+    "topics": [],
+    "parent": {
+      "full_name": "bi0h4z4rd88/pi-sidebar-tui",
+      "html_url": "https://github.com/bi0h4z4rd88/pi-sidebar-tui",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "bi0h4z4rd88/pi-sidebar-tui",
+      "html_url": "https://github.com/bi0h4z4rd88/pi-sidebar-tui",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "300437a30b367bdf135937a0ab6813a2a21a5e81",
+  "default_tree": "5fac9c7bc4b17f10dc8ba9cedef53f3e4510359e",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "300437a30b367bdf135937a0ab6813a2a21a5e81",
+      "archive_ref": "refs/heads/archive/pi-sidebar-tui/main"
+    },
+    "refs/tags/v1.0.0": {
+      "sha": "886a256f79d639a68bf841becb6cee50fb622f65",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.0.0"
+    },
+    "refs/tags/v1.1.0": {
+      "sha": "fc8e928762a09b22e7d5276a3a54645471a52224",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.1.0"
+    },
+    "refs/tags/v1.2.0": {
+      "sha": "18903651e7e7aaf5d5d91856737cc39a8c4df5c9",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.2.0"
+    },
+    "refs/tags/v1.4.0": {
+      "sha": "4bda330f940fbe8a41c35b6ee6aeb4ca681130ac",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.4.0"
+    },
+    "refs/tags/v1.5.0": {
+      "sha": "70021e42662c1821201ca9022328a514791e19db",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.5.0"
+    },
+    "refs/tags/v1.5.1": {
+      "sha": "73be631367bd3f5cd30db855e9c107c0b955058a",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.5.1"
+    },
+    "refs/tags/v1.5.2": {
+      "sha": "9cb5d5f26c0142c7c5814eab369f905fa0094160",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.5.2"
+    },
+    "refs/tags/v1.6.0": {
+      "sha": "fb32d07f54886fd9e5289b58f80ed98d7f43aaa1",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.6.0"
+    },
+    "refs/tags/v1.7.5-rodrigo.1": {
+      "sha": "863d074792e78597b504c27a5b2c5721fe0b545f",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.7.5-rodrigo.1"
+    },
+    "refs/tags/v1.7.5-rodrigo.2": {
+      "sha": "76f1f8b0481c1837ba80825696dba469231e3ceb",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.7.5-rodrigo.2"
+    },
+    "refs/tags/v1.7.5-rodrigo.3": {
+      "sha": "74c02e38afdb4530262ae433162d77ab837352a3",
+      "archive_ref": "refs/tags/archive/pi-sidebar-tui/v1.7.5-rodrigo.3"
+    }
+  },
+  "releases": [
+    {
+      "url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/releases/402176318",
+      "assets_url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/releases/402176318/assets",
+      "upload_url": "https://uploads.github.com/repos/rodrigojager/pi-sidebar-tui/releases/402176318/assets{?name,label}",
+      "html_url": "https://github.com/rodrigojager/pi-sidebar-tui/releases/tag/v1.7.5-rodrigo.3",
+      "id": 402176318,
+      "author": {
+        "login": "rodrigojager",
+        "id": 49778489,
+        "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+        "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/rodrigojager",
+        "html_url": "https://github.com/rodrigojager",
+        "followers_url": "https://api.github.com/users/rodrigojager/followers",
+        "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+        "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+        "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+        "repos_url": "https://api.github.com/users/rodrigojager/repos",
+        "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "node_id": "RE_kwDOUjkUDc4X-Lk-",
+      "tag_name": "v1.7.5-rodrigo.3",
+      "target_commitish": "main",
+      "name": "v1.7.5-rodrigo.3 — rpiv-todo e Pi Goal",
+      "draft": false,
+      "immutable": false,
+      "prerelease": false,
+      "created_at": "2026-10-02T21:42:09Z",
+      "updated_at": "2026-10-02T21:46:11Z",
+      "published_at": "2026-10-02T21:46:11Z",
+      "assets": [
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/releases/assets/606550733",
+          "id": 606550733,
+          "node_id": "RA_kwDOUjkUDc4kJzrN",
+          "name": "CHANGELOG.md",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/octet-stream",
+          "state": "uploaded",
+          "size": 14715,
+          "digest": "sha256:12dde72fe36a356c2028b505f4cbdbd66e852e8da4010a011eff619ba1b49cd4",
+          "download_count": 0,
+          "created_at": "2026-10-02T21:46:10Z",
+          "updated_at": "2026-10-02T21:46:10Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-sidebar-tui/releases/download/v1.7.5-rodrigo.3/CHANGELOG.md",
+          "archive_path": "archive/pi-sidebar-tui/releases/402176318/CHANGELOG.md",
+          "archive_sha256": "12dde72fe36a356c2028b505f4cbdbd66e852e8da4010a011eff619ba1b49cd4"
+        },
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/releases/assets/606550734",
+          "id": 606550734,
+          "node_id": "RA_kwDOUjkUDc4kJzrO",
+          "name": "LOCAL-CHANGES.md",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/octet-stream",
+          "state": "uploaded",
+          "size": 1645,
+          "digest": "sha256:a6712c936e976db73d75b55150bd539060c60f0db83e97d693e78c6908afead0",
+          "download_count": 0,
+          "created_at": "2026-10-02T21:46:10Z",
+          "updated_at": "2026-10-02T21:46:10Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-sidebar-tui/releases/download/v1.7.5-rodrigo.3/LOCAL-CHANGES.md",
+          "archive_path": "archive/pi-sidebar-tui/releases/402176318/LOCAL-CHANGES.md",
+          "archive_sha256": "a6712c936e976db73d75b55150bd539060c60f0db83e97d693e78c6908afead0"
+        },
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/releases/assets/606550739",
+          "id": 606550739,
+          "node_id": "RA_kwDOUjkUDc4kJzrT",
+          "name": "pi-sidebar-tui-1.7.5-rodrigo.3.tgz",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/x-gtar",
+          "state": "uploaded",
+          "size": 26126,
+          "digest": "sha256:bf1ff4e9bc9216a7478db53c1e2bbb96da0b184d27db333c86308aae87792bcc",
+          "download_count": 0,
+          "created_at": "2026-10-02T21:46:10Z",
+          "updated_at": "2026-10-02T21:46:11Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-sidebar-tui/releases/download/v1.7.5-rodrigo.3/pi-sidebar-tui-1.7.5-rodrigo.3.tgz",
+          "archive_path": "archive/pi-sidebar-tui/releases/402176318/pi-sidebar-tui-1.7.5-rodrigo.3.tgz",
+          "archive_sha256": "bf1ff4e9bc9216a7478db53c1e2bbb96da0b184d27db333c86308aae87792bcc"
+        },
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/releases/assets/606550738",
+          "id": 606550738,
+          "node_id": "RA_kwDOUjkUDc4kJzrS",
+          "name": "pi-sidebar-tui-1.7.5-rodrigo.3.tgz.sha256",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/octet-stream",
+          "state": "uploaded",
+          "size": 102,
+          "digest": "sha256:dde897ff33073fc8f7b1a30561b4246dac53423cc3ab11198253522519337f07",
+          "download_count": 0,
+          "created_at": "2026-10-02T21:46:10Z",
+          "updated_at": "2026-10-02T21:46:10Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-sidebar-tui/releases/download/v1.7.5-rodrigo.3/pi-sidebar-tui-1.7.5-rodrigo.3.tgz.sha256",
+          "archive_path": "archive/pi-sidebar-tui/releases/402176318/pi-sidebar-tui-1.7.5-rodrigo.3.tgz.sha256",
+          "archive_sha256": "dde897ff33073fc8f7b1a30561b4246dac53423cc3ab11198253522519337f07"
+        }
+      ],
+      "tarball_url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/tarball/v1.7.5-rodrigo.3",
+      "zipball_url": "https://api.github.com/repos/rodrigojager/pi-sidebar-tui/zipball/v1.7.5-rodrigo.3",
+      "body": "# Alterações da cópia de Rodrigo\n\n## 1.7.5-rodrigo.3 — 2026-10-02\n\nBase anterior: `76f1f8b0481c1837ba80825696dba469231e3ceb`, versão 1.7.5-rodrigo.2\ndo fork de [pi-sidebar-tui](https://github.com/rodrigojager/pi-sidebar-tui).\nO fork preserva o histórico e a licença MIT do autor original.\n\n- `parse-todos.ts`: aceita o envelope `tasks` e os campos `subject`, `activeForm`,\n  `owner` e `blockedBy` do rpiv-todo; oculta tarefas excluídas. Continua aceitando\n  o formato anterior `todos` / `text` / `done`.\n- `types.ts` e `panels/todos.ts`: mostram responsáveis e dependências e mantêm\n  as linhas dentro da largura disponível, inclusive em terminais estreitos.\n- `index.ts`: atualiza a lista em troca de ramo e compactação. Também incorpora\n  a personalização Pi Goal que já estava instalada localmente: objetivo no painel,\n  atividade da ferramenta atual e estados de conclusão, espera e bloqueio.\n- `package.json`: versão 1.7.5-rodrigo.3; dependências de desenvolvimento Pi 1.0.0.\n- Testes: snapshots antigos e novos, exclusão, atividade, responsável, dependências\n  e largura de renderização. Suíte completa: **139 testes aprovados**.\n\nO atalho da sidebar continua **Ctrl+Shift+T**. O perfil do rpiv-todo usa **Alt+T**\npara evitar conflito. Os reparos anteriores do renderer e do Git assíncrono permanecem.\n\nInstalação desta versão:\n\n```powershell\npi install https://github.com/rodrigojager/pi-sidebar-tui@v1.7.5-rodrigo.3\n```\n\nFaça a troca de uma instalação local apenas depois de terminar o trabalho na sessão\natual; escolha uma única fonte da sidebar nas configurações para não carregar duas cópias.\n"
+    }
+  ],
+  "issues": [],
+  "pull_requests": []
+}

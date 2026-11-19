@@ -1,0 +1,23 @@
+name: Publish Package
+on:
+  push:
+    tags: ['v*']
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view pi-check-agent-quota@"$VERSION" version >/dev/null 2>&1; then
+            echo "v$VERSION already published, skipping"
+          else
+            npm publish
+          fi

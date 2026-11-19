@@ -1,0 +1,718 @@
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { loadSidebarSettings, getAutoCompactEnabled, saveSidebarSettings, MIN_TODOS_MAX, MAX_TODOS_MAX } from "./config.ts";
+import type { TodoItem, SidebarContext, CtxSample } from "./types.ts";
+import { parseTodos, reconstructTodosFromBranch } from "./parse-todos.ts";
+import { renderSidebar } from "./sidebar.ts";
+import { getWorkspaceData, invalidateWorkspaceCache, onWorkspaceDataChanged } from "./workspace.ts";
+import { SidebarCompositor } from "./compositor.ts";
+import { getMcpServers, invalidateMcpCache } from "./mcp.ts";
+import { loadCavemanConfig, resolveCavemanLevel, cavemanInterval, type CavemanConfig } from "./caveman.ts";
+import { setPiTheme } from "./colors.ts";
+
+const TODO_TOOL_PATTERN = /todo/i;
+const WRITE_TOOLS = new Set(["write", "edit", "bash", "computer"]);
+
+const initialSettings = loadSidebarSettings();
+let sidebarEnabled = initialSettings.enabled;
+let sidebarWidth = initialSettings.width;
+let todosMax = initialSettings.todosMax;
+let sessionManager: any = null;
+let sessionTitle: string | null = null;
+let todos: TodoItem[] = [];
+let goalTodo: TodoItem | null = null;
+let goalToolAction: string | null = null;
+let currentModel: string | null = null;
+let thinkingLevel: string | null = null;
+let contextTokens: number | null = null;
+let contextPercent: number | null = null;
+let contextWindow: number | null = null;
+let tokensIn = 0;
+let tokensOut = 0;
+let cacheRead = 0;
+let cacheWrite = 0;
+let sessionCost = 0;
+let turnCount = 0;
+let activeTool: { name: string; startedAt: number } | null = null;
+let sessionStartMs = Date.now();
+let modelProvider: string | null = null;
+let agentStartMs: number | null = null;
+let msgStartMs: number | null = null;
+let liveTps: number | null = null;
+let lastTps: number | null = null;
+let lastTurnMs: number | null = null;
+let ctxSamples: CtxSample[] = [];
+let tpsSamples: { t: number; tokens: number }[] = [];
+const CTX_SAMPLE_MAX = 10;
+const TPS_WINDOW_MS = 2000;
+let sessionTimerHandle: ReturnType<typeof setInterval> | null = null;
+let unsubscribeMcpStatus: (() => void) | null = null;
+let unsubscribeWorkspace: (() => void) | null = null;
+let cavemanLevel: string | null = null;
+let cavemanFrame = 0;
+let cavemanTimer: ReturnType<typeof setInterval> | null = null;
+let cavemanCfg: CavemanConfig = { defaultLevel: "full", showStatus: true, present: false };
+let agentActive = false;
+let activityFrame = 0;
+let activityTimer: ReturnType<typeof setInterval> | null = null;
+
+function inferThinkingLevel(sm: any): string | null {
+  try {
+    const entries: any[] = sm.getBranch?.() ?? [];
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const e = entries[i];
+      if (e?.type === "thinking_level_change" && typeof e.thinkingLevel === "string") {
+        return e.thinkingLevel;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+const FILLER_PREFIX = /^(can you |could you |please |i want you to |i'd like you to |i need you to |help me |i need to |let's |let us )+/i;
+const METHOD_WRAPPER = /^(use|create|run|make|build|write|add|generate|implement|spawn|start)\s+(?:(?:a|an|the|some|my|one)\s+)?(?:\w+\s+){0,3}(?:to|that|which|for)\s+/i;
+
+function extractGoalObjective(prompt: string): string | null {
+  const match = prompt.match(/<goal_objective>\s*([\s\S]*?)\s*<\/goal_objective>/i);
+  if (!match) return null;
+  const objective = (match[1] ?? "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim();
+  return objective ? objective.replace(/\s+/g, " ").slice(0, 160) : null;
+}
+
+function summarizePrompt(raw: string): string {
+  const firstLine = raw.split("\n").map(l => l.trim()).find(l => l.length > 0) ?? raw.trim();
+  const noFiller = firstLine.replace(FILLER_PREFIX, "").trim();
+  const noWrapper = noFiller.replace(METHOD_WRAPPER, "").trim();
+  const title = noWrapper.charAt(0).toUpperCase() + noWrapper.slice(1);
+  return title.slice(0, 60);
+}
+
+async function generateTitleWithModel(prompt: string, ctx: any, onTitle: (t: string) => void): Promise<void> {
+  try {
+    const registry = ctx.modelRegistry;
+    if (!registry?.streamSimple) return;
+    const modelDesc = ctx.model;
+    if (!modelDesc) return;
+    const fullModel = (registry.getAll() as any[]).find((m: any) => m.id === modelDesc.id);
+    if (!fullModel) return;
+    const context = {
+      messages: [{
+        role: "user" as const,
+        content: `Write a 5-7 word task title for this request. Start with an action verb. No punctuation. Output only the title.\n\n${prompt.slice(0, 500)}`,
+      }],
+    };
+    const stream = registry.streamSimple(fullModel, context, { maxTokens: 20, reasoning: "off" });
+    const message = await (stream as any).result();
+    const text = (message.content as any[]).find((c: any) => c.type === "text")?.text?.trim() ?? "";
+    if (text.length > 0 && text.length <= 80) onTitle(text.slice(0, 60));
+  } catch {
+    // fallback already set
+  }
+}
+
+function inferSessionTitle(sm: any): string | null {
+  try {
+    const entries: any[] = sm.getBranch?.() ?? [];
+    for (const e of entries) {
+      if (e?.type !== "message") continue;
+      const msg = e.message;
+      if (msg?.role !== "user") continue;
+      const content = msg.content;
+      const text = typeof content === "string"
+        ? content
+        : Array.isArray(content)
+          ? content.find((c: any) => c?.type === "text")?.text ?? ""
+          : "";
+      if (text.trim()) return summarizePrompt(text);
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function refreshCavemanLevel(): void {
+  const branch = sessionManager?.getBranch?.() ?? [];
+  cavemanLevel = resolveCavemanLevel(branch, cavemanCfg);
+}
+
+function buildSidebarContext(cwd: string | undefined): SidebarContext {
+  const ws = getWorkspaceData(cwd);
+  return {
+    sessionTitle,
+    sessionId: sessionManager?.getSessionId?.() ?? null,
+    todos: goalTodo ? [goalTodo, ...todos.filter((todo) => todo.id !== goalTodo?.id)] : todos,
+    todosMax,
+    branch: ws.branch,
+    aheadCount: ws.aheadCount,
+    untrackedCount: ws.untrackedCount,
+    workspaceFiles: ws.files,
+    cwd,
+    model: currentModel,
+    thinkingLevel,
+    contextTokens,
+    contextPercent,
+    contextWindow,
+    tokensIn,
+    tokensOut,
+    cacheRead,
+    cacheWrite,
+    sessionCost,
+    turnCount,
+    activeTool,
+    autoCompactEnabled: getAutoCompactEnabled({ cwd }),
+    sessionStartMs,
+    mcpServers: getMcpServers(),
+    modelProvider,
+    cavemanLevel,
+    cavemanFrame,
+    agentActive,
+    spinnerFrame: activityFrame,
+    liveTps,
+    lastTps,
+    lastTurnMs,
+    ctxSamples,
+  };
+}
+
+function recordCtxSample(tokens: number): void {
+  const last = ctxSamples[ctxSamples.length - 1];
+  if (last && last.turns === turnCount) {
+    last.tokens = tokens; // dedupe: one sample per turn
+  } else {
+    ctxSamples.push({ tokens, turns: turnCount });
+    if (ctxSamples.length > CTX_SAMPLE_MAX) ctxSamples.shift();
+  }
+}
+
+function updateContextUsage(ctx: any): void {
+  try {
+    const usage = ctx.getContextUsage?.();
+    if (usage) {
+      contextTokens = typeof usage.tokens === "number" ? usage.tokens : null;
+      contextPercent = typeof usage.percent === "number" ? usage.percent : null;
+      contextWindow = typeof usage.contextWindow === "number" ? usage.contextWindow : null;
+      if (contextTokens !== null) recordCtxSample(contextTokens);
+    }
+    const model = ctx.model;
+    if (model?.name) currentModel = model.name;
+    else if (model?.id) currentModel = model.id;
+    modelProvider = (model as any)?.provider ?? (model as any)?.backend ?? null;
+  } catch {
+    // ignore
+  }
+}
+
+export default function piSidebar(pi: ExtensionAPI) {
+  let currentCwd: string | undefined = process.cwd();
+  let requestRender: (() => void) | null = null;
+  let tuiRef: any = null;
+  let compositorRef: SidebarCompositor | null = null;
+  let activeWidget: object | null = null;
+
+  const stopCavemanAnim = () => {
+    if (cavemanTimer) { clearInterval(cavemanTimer); cavemanTimer = null; }
+    cavemanFrame = 0;
+  };
+  const startCavemanAnim = () => {
+    stopCavemanAnim();
+    if (cavemanLevel && cavemanLevel !== "off") {
+      cavemanTimer = setInterval(() => {
+        cavemanFrame++;
+        requestRender?.();
+      }, cavemanInterval(cavemanLevel));
+    }
+  };
+  const stopActivityAnim = () => {
+    if (activityTimer) { clearInterval(activityTimer); activityTimer = null; }
+    activityFrame = 0;
+  };
+  const startActivityAnim = () => {
+    stopActivityAnim();
+    activityTimer = setInterval(() => {
+      activityFrame++;
+      requestRender?.();
+    }, 90);
+  };
+
+  const setSidebarEnabled = (enabled: boolean, ctx: any) => {
+    sidebarEnabled = enabled;
+    saveSidebarSettings({ enabled: sidebarEnabled, width: sidebarWidth, todosMax });
+
+    if (!sidebarEnabled) {
+      compositorRef?.dispose();
+      compositorRef = null;
+    } else if (tuiRef && !compositorRef) {
+      const comp = new SidebarCompositor(tuiRef, () => buildSidebarContext(currentCwd), sidebarWidth);
+      comp.install();
+      compositorRef = comp;
+      requestRender?.();
+    }
+
+    (ctx as any).ui?.notify?.(
+      `Sidebar ${sidebarEnabled ? "enabled" : "disabled"}`,
+      "info"
+    );
+  };
+
+  pi.on("session_start", async (_event, ctx) => {
+    sessionManager = ctx.sessionManager;
+    sessionTitle = ctx.sessionManager.getSessionName() ?? inferSessionTitle(ctx.sessionManager) ?? null;
+    // Seed todos from session history so the panel is correct on resume/branch
+    // (pi-todo stores a full snapshot in each `todo` tool result's details).
+    const branch = sessionManager?.getBranch?.() ?? [];
+    todos = reconstructTodosFromBranch(branch);
+    goalTodo = null;
+    goalToolAction = null;
+    for (const entry of branch) {
+      const message = (entry as any)?.message;
+      if (message?.role === "user") {
+        const content = typeof message.content === "string" ? message.content :
+          Array.isArray(message.content) ? message.content.filter((part: any) => part?.type === "text").map((part: any) => part.text ?? "").join("\n") : "";
+        const objective = extractGoalObjective(content);
+        if (objective) goalTodo = { id: "pi-goal", content: objective, status: "in_progress", subAction: "Resumed Goal" };
+      } else if (message?.role === "toolResult" && goalTodo && !message.isError) {
+        if (message.toolName === "goal_complete") goalTodo = { ...goalTodo, status: "completed", subAction: undefined };
+        else if (message.toolName === "goal_wait") goalTodo = { ...goalTodo, status: "pending", subAction: "Waiting for wake-up" };
+        else if (message.toolName === "goal_blocked") goalTodo = { ...goalTodo, status: "pending", subAction: "Blocked" };
+      }
+    }
+    currentModel = null;
+    thinkingLevel = null;
+    contextTokens = null;
+    contextPercent = null;
+    contextWindow = null;
+    ctxSamples = [];
+    sessionStartMs = Date.now();
+    cavemanCfg = loadCavemanConfig();
+    refreshCavemanLevel();
+    stopCavemanAnim();
+    if (sessionTimerHandle) { clearInterval(sessionTimerHandle); sessionTimerHandle = null; }
+    sessionTimerHandle = setInterval(() => requestRender?.(), 30_000);
+    activeTool = null;
+    turnCount = 0;
+    // Seed usage totals from existing session entries (handles resume)
+    { let inSum = 0, outSum = 0, cacheSum = 0, costSum = 0, turns = 0;
+      for (const e of (ctx.sessionManager.getBranch?.() ?? [])) {
+        const m = (e as any).message;
+        if ((e as any).type !== "message") continue;
+        if (m?.role === "user") { turns++; continue; }
+        if (m?.role !== "assistant") continue;
+        if (m?.stopReason === "error" || m?.stopReason === "aborted") continue;
+        inSum += m.usage?.input ?? 0;
+        outSum += m.usage?.output ?? 0;
+        cacheSum += m.usage?.cacheRead ?? 0;
+        cacheWrite += m.usage?.cacheWrite ?? 0;
+        costSum += m.usage?.cost?.total ?? 0;
+      }
+      tokensIn = inSum; tokensOut = outSum; cacheRead = cacheSum; sessionCost = costSum;
+      turnCount = turns;
+    }
+    invalidateWorkspaceCache();
+    currentCwd = (ctx as any).cwd;
+    updateContextUsage(ctx);
+    // Prefer live API; fall back to last thinking_level_change entry in history
+    // Session history is authoritative for resumed sessions; fall back to live API
+    thinkingLevel = inferThinkingLevel(ctx.sessionManager) ?? pi.getThinkingLevel?.() ?? null;
+
+    const hasUI = (ctx as any).hasUI;
+    if (!hasUI) return;
+
+    const ui = (ctx as any).ui;
+    let renderTick = 0;
+
+    const scheduleRender = () => {
+      const tick = ++renderTick;
+      setTimeout(() => {
+        if (tick === renderTick) {
+          if (compositorRef) {
+            compositorRef.paint();
+          } else {
+            tuiRef?.requestRender();
+          }
+        }
+      }, 16);
+    };
+    const myRender = scheduleRender;
+    requestRender = myRender;
+    unsubscribeWorkspace?.();
+    unsubscribeWorkspace = onWorkspaceDataChanged(() => requestRender?.());
+
+    // Keep MCP status live: the MCP adapter publishes a runtime snapshot on the
+    // shared event bus whenever server state changes (enable/disable, connect,
+    // fail, auth). Invalidate the file cache and repaint so the panel updates
+    // directly instead of waiting for the next session.
+    if (pi.events) {
+      if (unsubscribeMcpStatus) { unsubscribeMcpStatus(); unsubscribeMcpStatus = null; }
+      unsubscribeMcpStatus = pi.events.on("pi-mcp-adapter/status/v1", () => {
+        invalidateMcpCache();
+        requestRender?.();
+      });
+    }
+
+    ui.setWidget("pi-sidebar", (tui: any, _theme: any) => {
+      setPiTheme(_theme);
+      const widget = {};
+      activeWidget = widget;
+      compositorRef?.dispose();
+      compositorRef = null;
+      tuiRef = null;
+
+      const syncRenderer = () => {
+        if (activeWidget !== widget) return;
+        const renderer = tui.valueOf();
+        if (tuiRef === renderer) return;
+        compositorRef?.dispose();
+        compositorRef = null;
+        tuiRef = renderer;
+        if (sidebarEnabled) {
+          const comp = new SidebarCompositor(
+            renderer,
+            () => buildSidebarContext(currentCwd),
+            sidebarWidth,
+          );
+          comp.install();
+          compositorRef = comp;
+          // A mode switch can be detected during a render. Repaint once with
+          // the newly installed compositor and its narrowed terminal width.
+          renderer.requestRender(true);
+        }
+      };
+      syncRenderer();
+
+      return {
+        dispose() {
+          if (activeWidget !== widget) return;
+          activeWidget = null;
+          if (requestRender === myRender) { requestRender = null; }
+          compositorRef?.dispose();
+          compositorRef = null;
+          tuiRef = null;
+        },
+        invalidate() {},
+        render(_width: number): string[] {
+          syncRenderer();
+          return [];
+        },
+      };
+    }, { placement: "belowEditor" });
+  });
+
+  pi.on("session_info_changed", async (event, _ctx) => {
+    const name = (event as any).name;
+    sessionTitle = typeof name === "string" ? name : null;
+    requestRender?.();
+  });
+
+  const refreshTodosFromHistory = async (_event: unknown, ctx: any) => {
+    if (sessionManager?.getSessionId?.() !== ctx.sessionManager?.getSessionId?.()) return;
+    todos = reconstructTodosFromBranch(ctx.sessionManager.getBranch?.() ?? []);
+    requestRender?.();
+  };
+  pi.on("session_tree", refreshTodosFromHistory);
+  pi.on("session_compact", refreshTodosFromHistory);
+
+  pi.on("session_shutdown", async () => {
+    unsubscribeWorkspace?.();
+    unsubscribeWorkspace = null;
+    if (sessionTimerHandle) { clearInterval(sessionTimerHandle); sessionTimerHandle = null; }
+    if (unsubscribeMcpStatus) { unsubscribeMcpStatus(); unsubscribeMcpStatus = null; }
+    stopCavemanAnim();
+    stopActivityAnim();
+    agentActive = false;
+    cavemanLevel = null;
+    tokensIn = 0;
+    tokensOut = 0;
+    cacheRead = 0;
+    cacheWrite = 0;
+    sessionCost = 0;
+    turnCount = 0;
+    activeTool = null;
+    agentStartMs = null;
+    msgStartMs = null;
+    liveTps = null;
+    lastTps = null;
+    lastTurnMs = null;
+    ctxSamples = [];
+    tpsSamples = [];
+    sessionTitle = null;
+    todos = [];
+    goalTodo = null;
+    goalToolAction = null;
+  });
+
+  pi.on("before_agent_start", async (event, ctx) => {
+    currentCwd = (ctx as any).cwd;
+    const prompt = typeof (event as any).prompt === "string" ? (event as any).prompt as string : "";
+    const goalObjective = extractGoalObjective(prompt);
+    if (goalObjective) {
+      goalTodo = { id: "pi-goal", content: goalObjective, status: "in_progress", subAction: goalToolAction ?? "Working" };
+      requestRender?.();
+    }
+    if (sessionTitle === null && typeof (event as any).prompt === "string") {
+      const raw = (event as any).prompt as string;
+      sessionTitle = summarizePrompt(raw);
+      generateTitleWithModel(raw, ctx, (title) => {
+        sessionTitle = title;
+        requestRender?.();
+      });
+    }
+    updateContextUsage(ctx);
+    requestRender?.();
+  });
+
+  pi.on("tool_call", async (event, ctx) => {
+    currentCwd = (ctx as any).cwd;
+    const toolName = (event as any).toolName ?? "";
+    const input = (event as any).input;
+
+    if (goalTodo && !toolName.startsWith("goal_")) {
+      const action = toolName === "read" ? `Read ${input?.file_path ?? input?.path ?? "file"}` :
+        toolName === "bash" ? `Run ${String(input?.command ?? "command").split("\\n")[0].slice(0, 42)}` :
+        toolName === "edit" || toolName === "write" ? `${toolName} ${input?.file_path ?? input?.path ?? "file"}` : toolName;
+      goalToolAction = action.slice(0, 56);
+      goalTodo = { ...goalTodo, status: "in_progress", subAction: goalToolAction };
+      requestRender?.();
+    }
+
+    if (toolName.startsWith("goal_")) {
+      goalToolAction = toolName === "goal_complete" ? "Completing" : toolName === "goal_wait" ? "Waiting" : toolName === "goal_blocked" ? "Blocked" : toolName;
+      goalTodo = goalTodo ? { ...goalTodo, subAction: goalToolAction } : goalTodo;
+      requestRender?.();
+    }
+
+    if (TODO_TOOL_PATTERN.test(toolName)) {
+      const parsed = parseTodos(input);
+      if (parsed !== null) {
+        todos = parsed;
+        requestRender?.();
+      }
+    }
+  });
+
+  pi.on("tool_result", async (event) => {
+    const toolName = (event as any).toolName ?? "";
+
+    if (WRITE_TOOLS.has(toolName.toLowerCase())) {
+      invalidateWorkspaceCache();
+    }
+
+    // Todo tools (pi-todo, built-in) keep the list in the tool RESULT
+    // details, not the input. The `tool_call` handler above only sees the
+    // action ({ action, text, id }), so read the authoritative list here.
+    if (toolName === "goal_complete" && goalTodo && !(event as any).isError) {
+      goalTodo = { ...goalTodo, status: "completed", subAction: undefined };
+      goalToolAction = null;
+      requestRender?.();
+    } else if ((toolName === "goal_wait" || toolName === "goal_blocked") && goalTodo && !(event as any).isError) {
+      goalTodo = { ...goalTodo, status: "pending", subAction: toolName === "goal_wait" ? "Waiting for wake-up" : "Blocked" };
+      goalToolAction = null;
+      requestRender?.();
+    }
+
+    if (TODO_TOOL_PATTERN.test(toolName)) {
+      const parsed = parseTodos((event as any).details);
+      if (parsed !== null) {
+        todos = parsed;
+        requestRender?.();
+      }
+    }
+
+  });
+
+  pi.on("message_start", async (event) => {
+    if ((event as any).message?.role === "assistant") {
+      msgStartMs = Date.now();
+      liveTps = null;
+      tpsSamples = [];
+    }
+  });
+
+  pi.on("message_update", async (event) => {
+    if ((event as any).message?.role !== "assistant") return;
+    if (msgStartMs === null) msgStartMs = Date.now();
+    const now = Date.now();
+    // prefer usage.output; fall back to char count / 4
+    const usageOut = (event as any).message?.usage?.output ?? 0;
+    const textLen = ((event as any).message?.content as any[] | undefined)
+      ?.filter((c: any) => c.type === "text")
+      .reduce((s: number, c: any) => s + (c.text?.length ?? 0), 0) ?? 0;
+    const tokens = usageOut > 0 ? usageOut : Math.round(textLen / 4);
+    if (tokens > 0) {
+      tpsSamples.push({ t: now, tokens });
+      // drop samples outside the window
+      while (tpsSamples.length > 1 && now - tpsSamples[0].t > TPS_WINDOW_MS) {
+        tpsSamples.shift();
+      }
+      if (tpsSamples.length >= 2) {
+        const oldest = tpsSamples[0];
+        const dt = now - oldest.t;
+        const dk = tokens - oldest.tokens;
+        if (dt > 0 && dk > 0) {
+          liveTps = Math.round(dk / (dt / 1000));
+          requestRender?.();
+        }
+      }
+    }
+  });
+
+  pi.on("message_end", async (event, ctx) => {
+    currentCwd = (ctx as any).cwd;
+    const usage = (event as any).message?.usage;
+    if (usage && (event as any).message?.role === "assistant") {
+      const stopReason = (event as any).message?.stopReason;
+      if (stopReason !== "error" && stopReason !== "aborted") {
+        tokensIn += usage.input ?? 0;
+        tokensOut += usage.output ?? 0;
+        cacheRead += usage.cacheRead ?? 0;
+        cacheWrite += usage.cacheWrite ?? 0;
+        sessionCost += usage.cost?.total ?? 0;
+        const out = usage.output ?? 0;
+        const elapsed = msgStartMs !== null ? Date.now() - msgStartMs : null;
+        if (elapsed !== null && elapsed > 50 && out > 0) {
+          lastTps = Math.round(out / (elapsed / 1000));
+        }
+        liveTps = null;
+        msgStartMs = null;
+      }
+    }
+    requestRender?.();
+  });
+
+  pi.on("turn_end", async (_event, ctx) => {
+    currentCwd = (ctx as any).cwd;
+    updateContextUsage(ctx);
+    invalidateWorkspaceCache();
+    refreshCavemanLevel();
+    turnCount++;
+    activeTool = null;
+    if (agentStartMs !== null) {
+      lastTurnMs = Date.now() - agentStartMs;
+      agentStartMs = null;
+    }
+    requestRender?.();
+  });
+
+  pi.on("agent_end", async (_event, ctx) => {
+    currentCwd = (ctx as any).cwd;
+    updateContextUsage(ctx);
+    invalidateWorkspaceCache();
+    stopCavemanAnim();
+    agentActive = false;
+    stopActivityAnim();
+    requestRender?.();
+  });
+
+  pi.on("model_select", async (event, ctx) => {
+    const m = (event as any).model;
+    if (m?.name) currentModel = m.name;
+    else if (m?.id) currentModel = m.id;
+    msgStartMs = null;
+    liveTps = null;
+    lastTps = null;
+    lastTurnMs = null;
+    tpsSamples = [];
+    updateContextUsage(ctx);
+    requestRender?.();
+  });
+
+  pi.on("agent_start", async (_event, ctx) => {
+    currentCwd = (ctx as any).cwd;
+    agentStartMs = Date.now();
+    msgStartMs = null;
+    updateContextUsage(ctx);
+    refreshCavemanLevel();
+    startCavemanAnim();
+    agentActive = true;
+    startActivityAnim();
+    requestRender?.();
+  });
+
+  pi.on("tool_execution_start", async (event) => {
+    const name = (event as any).toolName ?? "";
+    activeTool = { name, startedAt: Date.now() };
+    requestRender?.();
+  });
+
+  pi.on("tool_execution_end", async () => {
+    activeTool = null;
+    requestRender?.();
+  });
+
+  pi.on("thinking_level_select", async (event) => {
+    thinkingLevel = (event as any).level ?? null;
+    requestRender?.();
+  });
+
+  pi.registerCommand("sidebar-tui", {
+    description: "Control sidebar: /sidebar-tui on | off | width <N> | todos <N>",
+    handler: async (args, ctx) => {
+      currentCwd = (ctx as any).cwd;
+      const parts = (args?.trim() ?? "").split(/\s+/);
+      const cmd = parts[0];
+
+      if (cmd === "width") {
+        const n = parseInt(parts[1] ?? "", 10);
+        if (isNaN(n) || n < 10 || n > 120) {
+          (ctx as any).ui?.notify?.("Usage: /sidebar-tui width <10-120>", "warning");
+          return;
+        }
+        sidebarWidth = n;
+        saveSidebarSettings({ enabled: sidebarEnabled, width: sidebarWidth, todosMax });
+        if (compositorRef && tuiRef) {
+          compositorRef.dispose();
+          compositorRef = null;
+          const comp = new SidebarCompositor(tuiRef, () => buildSidebarContext(currentCwd), sidebarWidth);
+          comp.install();
+          compositorRef = comp;
+          requestRender?.();
+        }
+        (ctx as any).ui?.notify?.(`Sidebar width set to ${n}`, "info");
+        return;
+      }
+
+      if (cmd === "todos") {
+        const n = parseInt(parts[1] ?? "", 10);
+        if (isNaN(n) || n < MIN_TODOS_MAX || n > MAX_TODOS_MAX) {
+          (ctx as any).ui?.notify?.(`Usage: /sidebar-tui todos <${MIN_TODOS_MAX}-${MAX_TODOS_MAX}>`, "warning");
+          return;
+        }
+        todosMax = n;
+        saveSidebarSettings({ enabled: sidebarEnabled, width: sidebarWidth, todosMax });
+        requestRender?.();
+        (ctx as any).ui?.notify?.(`Todos max set to ${n}`, "info");
+        return;
+      }
+
+      if (cmd !== "on" && cmd !== "off") {
+        (ctx as any).ui?.notify?.("Usage: /sidebar-tui on | off | width <N> | todos <N>", "warning");
+        return;
+      }
+
+      setSidebarEnabled(cmd === "on", ctx);
+    },
+  });
+
+  pi.registerShortcut("ctrl+shift+t", {
+    description: "Toggle sidebar on/off",
+    handler: async (ctx) => {
+      currentCwd = (ctx as any).cwd;
+      setSidebarEnabled(!sidebarEnabled, ctx);
+    },
+  });
+
+  pi.registerCommand("session-title", {
+    description: "Set session title shown in sidebar",
+    handler: async (args, ctx) => {
+      const title = args?.trim() ?? "";
+      if (!title) {
+        (ctx as any).ui?.notify?.("Usage: /session-title <text>", "warning");
+        return;
+      }
+      sessionTitle = title;
+      requestRender?.();
+      (ctx as any).ui?.notify?.(`Session title set: ${title}`, "info");
+    },
+  });
+}

@@ -1,0 +1,42 @@
+{
+  "repository": {
+    "id": 1430723324,
+    "full_name": "rodrigojager/pi-workspace-search",
+    "html_url": "https://github.com/rodrigojager/pi-workspace-search",
+    "description": "Bounded workspace retrieval for Pi with ripgrep, local zvec, and optional Jev classification",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-23T07:30:42Z",
+    "pushed_at": "2026-10-23T07:30:52Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": []
+  },
+  "default_commit": "aaba286c69689929dce51e14118dc427accd9c6a",
+  "default_tree": "472b72e9f254a60c65a0a64ff9c859ce5542d26c",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "aaba286c69689929dce51e14118dc427accd9c6a",
+      "archive_ref": "refs/heads/archive/pi-workspace-search/main"
+    },
+    "refs/tags/v0.1.0": {
+      "sha": "4024ce6e8897a80848e810b0d0642fd08cb6d805",
+      "archive_ref": "refs/tags/archive/pi-workspace-search/v0.1.0"
+    },
+    "refs/tags/v0.1.1": {
+      "sha": "9df71820c61babe845005f7bc3ffc4ea310db43b",
+      "archive_ref": "refs/tags/archive/pi-workspace-search/v0.1.1"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

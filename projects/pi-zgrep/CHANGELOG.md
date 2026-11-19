@@ -1,0 +1,58 @@
+# Changelog
+
+## Unreleased
+
+Rename the shared search skill from `workspace-search` to `pi-zgrep-search` to distinguish it from the retired workspace-search implementation. Keep its instructions and all search behavior unchanged.
+
+## [v0.3.1-rodrigo.1] - 2026-10-03
+
+Windows-compatible fork of the complete upstream 0.3.0 package. Fix process/shim and daemon launching, paths with spaces and drive letters, quoted index arguments and valued flags, query error reporting, current-call cancellation, stderr progress and empty-result parsing. Retain all upstream routes, parameters, commands, lifecycle controls and environment switches.
+
+Add an English workspace-search skill, Pi integration examples, Windows/Linux CI and a real Pi SDK smoke. Validated locally on Windows x64 / Node 26.1.0 / Pi 1.0.0 / engine 0.2.2: lint, formatting, type checks, 62 regression tests, two real-engine E2E tests and 13 Pi SDK checks. See WINDOWS.md for changes and validation boundaries.
+
+All notable changes to pi-zgrep. Release sections are curated before tagging
+(user-facing notes, not commit subjects); `git-cliff` with `cliff.toml` drafts
+the raw commit list to rewrite from.
+
+## [v0.3.0] - 2026-09-03
+
+- New `/zg-server` command: start, stop, or inspect the daemon (`on|off|status`) without leaving pi. The daemon still starts on its own, and session warmup now revives it if it died between sessions, so one daemon serves all sessions (upstream enforces a single instance per home). `/zg-status` shows its real state instead of telling you to go run `zg server status` yourself.
+- `/zg-index` no longer spawns doomed builds: flags pass straight through to `zg index`, a bare word forwards only when it is an existing workspace path, and anything else gets a usage line pointing at `/zg-status`.
+- `/zg-index` and `/zg-server` suggest their arguments in the command palette as you type.
+- The zg tool description now leads with "call this tool directly", states the index scope boundary (node_modules, .git, build outputs, and anything outside the workspace are not indexed), gives a concrete example per search mode, and lists all four legit reasons to fall back to grep.
+- AGENTS.md documents why the packaged engine outranks any global binary, and the daemon lifecycle.
+
+## [v0.2.2] - 2026-09-03
+
+- npm metadata tune-up for the pi.dev package gallery and npm search: added the author field, broadened keywords (search, grep, hybrid-search, embeddings, rag, coding-agent), and sharpened the description so filters surface the package for the terms people actually type. No code changes.
+
+## [v0.2.1] - 2026-09-03
+
+- The `zg` tool description and the session-start guidance now say outright that `zg` is a tool to call directly, not a binary to run from a shell. This fixes agents that ran `which zg`, saw it fail, and quietly fell back to grep instead of using the tool.
+- A regression test pins the no-binary wording in the guidance text so a future reword can't drop it.
+
+## [v0.2.0] - 2026-09-03
+
+- The zg engine now installs as a regular npm dependency: `pi install npm:pi-zgrep` brings everything with it, no lifecycle scripts involved, safe under npm 12's default script blocking.
+- The index builds in the background at session start, so the first search of a session hits a ready index. One build runs per process, and the daemon from a previous session is reused instead of started twice.
+- Binary resolution order: `PI_ZG_BIN`, then the packaged engine, then `zg` on PATH, then a global install on first use.
+- README rewritten: payoff-first structure with a real output example, and benchmarks that point at upstream's suite (SWE-QA-Bench, BrowseComp-Plus) while ours stays as a local reference.
+- Upstream-version safety nets: Dependabot bumps the engine range, and a weekly canary runs unit plus e2e against `@zvec/zvec-grep@latest`, managing a `canary`-labeled tracking issue automatically.
+
+## [v0.1.1] - 2026-09-03
+
+- Add benchmark vs ripgrep and grep with replication script ([76703f9](https://github.com/carvalab/pi-zgrep/commit/76703f9fc2c53cde87844a7f95ba239240d31523))
+- Add gallery preview image and release 0.1.1 ([2ae789b](https://github.com/carvalab/pi-zgrep/commit/2ae789b197def015def7b3a359e7c92cc69fe8e2))
+
+## [v0.1.0] - 2026-09-03
+
+- Add zg tool, /zg-index and /zg-status commands, and spawn runner ([45edb0f](https://github.com/carvalab/pi-zgrep/commit/45edb0f94766e45ebb9414a7ba6789c590acb6c2))
+- Add binary resolver and index ensure chain with concurrency locks ([4114d99](https://github.com/carvalab/pi-zgrep/commit/4114d99cb8f2310f6133a3dbe26b32d2233e3961))
+- Add fixture-driven output parser with raw-passthrough fallback ([49dbdc1](https://github.com/carvalab/pi-zgrep/commit/49dbdc1aa5859208b5b4ba4b322278b6e270d35b))
+- Add zg arg builder with help-fixture tripwire (rg route omits flags upstream rejects) ([152c4bc](https://github.com/carvalab/pi-zgrep/commit/152c4bc47c36fe65a720275dc2eba703ba3d9ba))
+- Capture zg compat fixtures from the real engine (zg 0.2.1) ([022d721](https://github.com/carvalab/pi-zgrep/commit/022d7215534ed83db312f17d076f1c536efe0b6a))
+- Add gated e2e tests driving buildQueryArgs against the real engine ([26f2955](https://github.com/carvalab/pi-zgrep/commit/26f2955b105c1d4a7b725786f68652188bf980bb))
+- Add README, contributing guide, spec, and implementation plan ([a16fa47](https://github.com/carvalab/pi-zgrep/commit/a16fa478a559cfa78cbf591d1ec998b94f58ed5f))
+- Scaffold package, toolchain, CI, and release workflow ([a59e2dc](https://github.com/carvalab/pi-zgrep/commit/a59e2dc264d0ef4ab46cc288d9213899662da6a1))
+
+<!-- generated by git-cliff, curated by hand from 0.2.0 onward -->

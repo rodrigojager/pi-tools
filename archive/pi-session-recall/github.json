@@ -1,0 +1,56 @@
+{
+  "repository": {
+    "id": 1396418368,
+    "full_name": "rodrigojager/pi-session-recall",
+    "html_url": "https://github.com/rodrigojager/pi-session-recall",
+    "description": "Local-first Pi package for read-only session indexing and recall",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-09-29T19:06:43Z",
+    "pushed_at": "2026-09-29T19:07:56Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": [],
+    "parent": {
+      "full_name": "gchigoo/pi-session-recall",
+      "html_url": "https://github.com/gchigoo/pi-session-recall",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "gchigoo/pi-session-recall",
+      "html_url": "https://github.com/gchigoo/pi-session-recall",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "31809923b2729cc1d0b336e91399b696857d8ab2",
+  "default_tree": "9d85eaecf51b182a33463783519cdcaa79e5371b",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "31809923b2729cc1d0b336e91399b696857d8ab2",
+      "archive_ref": "refs/heads/archive/pi-session-recall/main"
+    },
+    "refs/tags/v1.0.0": {
+      "sha": "c99f8325598122738bb5fc609243e4eadfd37642",
+      "archive_ref": "refs/tags/archive/pi-session-recall/v1.0.0"
+    },
+    "refs/tags/v1.0.1": {
+      "sha": "41fa14d4139e88c935d8d829730807edd4e04a54",
+      "archive_ref": "refs/tags/archive/pi-session-recall/v1.0.1"
+    },
+    "refs/tags/v1.0.2": {
+      "sha": "c398e42da2b3137b2b6b8ae517c31a312b3d4ebf",
+      "archive_ref": "refs/tags/archive/pi-session-recall/v1.0.2"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

@@ -1,0 +1,363 @@
+{
+  "repository": {
+    "id": 1402285376,
+    "full_name": "rodrigojager/pi-subagent",
+    "html_url": "https://github.com/rodrigojager/pi-subagent",
+    "description": null,
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-02T19:46:57Z",
+    "pushed_at": "2026-10-23T05:46:45Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": [],
+    "parent": {
+      "full_name": "mystilleef/pi-subagent",
+      "html_url": "https://github.com/mystilleef/pi-subagent",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "mystilleef/pi-subagent",
+      "html_url": "https://github.com/mystilleef/pi-subagent",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "ec0591a75a23c6d7d60e95263767f6dcd859ba72",
+  "default_tree": "4b771121f20aed6325a444a9d85d1a4e3457321d",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "ec0591a75a23c6d7d60e95263767f6dcd859ba72",
+      "archive_ref": "refs/heads/archive/pi-subagent/main"
+    },
+    "refs/tags/v0.10.0": {
+      "sha": "87c638b2a1f6e71779cbe1db5abee2c665904791",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.10.0"
+    },
+    "refs/tags/v0.10.1": {
+      "sha": "eb91af534bd8253d71239632131a884cb9630f79",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.10.1"
+    },
+    "refs/tags/v0.10.2": {
+      "sha": "397a33a935ce082d76b46b595b85864690bab070",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.10.2"
+    },
+    "refs/tags/v0.11.0": {
+      "sha": "527592f9478cdc2bef41145a4fcc13490c8e7054",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.11.0"
+    },
+    "refs/tags/v0.12.0": {
+      "sha": "3d071c7a1b45d1f97c4fd0f56dcf52d4a1622fdd",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.12.0"
+    },
+    "refs/tags/v0.12.1": {
+      "sha": "231ba598c2a7e4be19167ece648a85dc2406a576",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.12.1"
+    },
+    "refs/tags/v0.12.2": {
+      "sha": "94187858e08e9c6c80cb4f2fdc0ae6594a5a8be0",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.12.2"
+    },
+    "refs/tags/v0.12.3": {
+      "sha": "cadb4509fd2b757c9a4b30986f09e214fc8bf951",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.12.3"
+    },
+    "refs/tags/v0.12.4": {
+      "sha": "7746c5dfb10d51b7e2098cc2b43aa94a50d7c9ba",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.12.4"
+    },
+    "refs/tags/v0.12.4-rodrigo.1": {
+      "sha": "3c183ea78b152640fba441719294b4e866dff440",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.12.4-rodrigo.1"
+    },
+    "refs/tags/v0.12.4-rodrigo.2": {
+      "sha": "04cb7afa175e4a1e4fbad2a715609383b5f761c6",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.12.4-rodrigo.2"
+    },
+    "refs/tags/v0.2.0": {
+      "sha": "92512fed1ca854cafd6a204413e12fbd1ca49931",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.2.0"
+    },
+    "refs/tags/v0.3.0": {
+      "sha": "dc92f9afae4f1eaf4ced7d10207f7727bb0d7781",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.3.0"
+    },
+    "refs/tags/v0.3.1": {
+      "sha": "2a654e51c90cdc6cbe347fc87118d9e34dd4147d",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.3.1"
+    },
+    "refs/tags/v0.4.0": {
+      "sha": "109ada79f6c6f6939045e1a81d237911d529420f",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.4.0"
+    },
+    "refs/tags/v0.5.0": {
+      "sha": "1375bb20fc02b1717fceb9122c766d76f2cef339",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.5.0"
+    },
+    "refs/tags/v0.6.0": {
+      "sha": "fe9e42e14ad5279fe8b6956efc3f3983fbe8a8fb",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.6.0"
+    },
+    "refs/tags/v0.7.0": {
+      "sha": "d412d31dde4efe825ba51b3892709af71d54160b",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.7.0"
+    },
+    "refs/tags/v0.8.0": {
+      "sha": "04a654a2ba4b7bf8c746ce6ff7e688ad681d320e",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.8.0"
+    },
+    "refs/tags/v0.9.0": {
+      "sha": "3c43098a7feee56217e0a7423a8cf37db29392ba",
+      "archive_ref": "refs/tags/archive/pi-subagent/v0.9.0"
+    }
+  },
+  "releases": [
+    {
+      "url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/402245131",
+      "assets_url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/402245131/assets",
+      "upload_url": "https://uploads.github.com/repos/rodrigojager/pi-subagent/releases/402245131/assets{?name,label}",
+      "html_url": "https://github.com/rodrigojager/pi-subagent/releases/tag/v0.12.4-rodrigo.2",
+      "id": 402245131,
+      "author": {
+        "login": "rodrigojager",
+        "id": 49778489,
+        "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+        "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/rodrigojager",
+        "html_url": "https://github.com/rodrigojager",
+        "followers_url": "https://api.github.com/users/rodrigojager/followers",
+        "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+        "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+        "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+        "repos_url": "https://api.github.com/users/rodrigojager/repos",
+        "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "node_id": "RE_kwDOU5UtQM4X-cYL",
+      "tag_name": "v0.12.4-rodrigo.2",
+      "target_commitish": "main",
+      "name": "Pi Subagent 0.12.4-rodrigo.2 — agent-switcher bridge",
+      "draft": false,
+      "immutable": false,
+      "prerelease": false,
+      "created_at": "2026-10-03T00:34:01Z",
+      "updated_at": "2026-10-03T00:42:09Z",
+      "published_at": "2026-10-03T00:42:09Z",
+      "assets": [
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/assets/606800560",
+          "id": 606800560,
+          "node_id": "RA_kwDOU5UtQM4kKwqw",
+          "name": "mystilleef-pi-subagent-0.12.4-rodrigo.2.tgz",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/x-gtar",
+          "state": "uploaded",
+          "size": 108784,
+          "digest": "sha256:28e0c6736b822063b4422b7b0eed1c1f351700542d04d6076a6e45837746d71e",
+          "download_count": 0,
+          "created_at": "2026-10-03T00:42:08Z",
+          "updated_at": "2026-10-03T00:42:08Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-subagent/releases/download/v0.12.4-rodrigo.2/mystilleef-pi-subagent-0.12.4-rodrigo.2.tgz",
+          "archive_path": "archive/pi-subagent/releases/402245131/mystilleef-pi-subagent-0.12.4-rodrigo.2.tgz",
+          "archive_sha256": "28e0c6736b822063b4422b7b0eed1c1f351700542d04d6076a6e45837746d71e"
+        }
+      ],
+      "tarball_url": "https://api.github.com/repos/rodrigojager/pi-subagent/tarball/v0.12.4-rodrigo.2",
+      "zipball_url": "https://api.github.com/repos/rodrigojager/pi-subagent/zipball/v0.12.4-rodrigo.2",
+      "body": "Add a public event-bus delegation bridge for Rodrigo's Pi Agent Switcher. Manually addressed tasks use the same existing subagent lifecycle, project-agent confirmation, progress cards, completion results and cancellation.\n\nThe bridge adds no second subagent engine and leaves `/run` and the existing tools available. Integration channel: `rodrigojager:pi-subagent:delegate:v1`.\n\nValidation: Bun check, full verify (1,843 tests passed, zero failures) and a 47-file package smoke check. The compatible selector also passed an end-to-end Pi SDK test with a real offline child process.\n\nThe attached archive contains the runtime package. Reload an already-running Pi only after active work finishes.\n"
+    },
+    {
+      "url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/402109490",
+      "assets_url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/402109490/assets",
+      "upload_url": "https://uploads.github.com/repos/rodrigojager/pi-subagent/releases/402109490/assets{?name,label}",
+      "html_url": "https://github.com/rodrigojager/pi-subagent/releases/tag/v0.12.4-rodrigo.1",
+      "id": 402109490,
+      "author": {
+        "login": "rodrigojager",
+        "id": 49778489,
+        "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+        "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/rodrigojager",
+        "html_url": "https://github.com/rodrigojager",
+        "followers_url": "https://api.github.com/users/rodrigojager/followers",
+        "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+        "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+        "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+        "repos_url": "https://api.github.com/users/rodrigojager/repos",
+        "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "node_id": "RE_kwDOU5UtQM4X97Qy",
+      "tag_name": "v0.12.4-rodrigo.1",
+      "target_commitish": "main",
+      "name": "Pi Subagent UI 0.12.4-rodrigo.1",
+      "draft": false,
+      "immutable": false,
+      "prerelease": false,
+      "created_at": "2026-10-02T19:47:02Z",
+      "updated_at": "2026-10-02T19:48:10Z",
+      "published_at": "2026-10-02T19:48:10Z",
+      "assets": [
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/assets/606361130",
+          "id": 606361130,
+          "node_id": "RA_kwDOU5UtQM4kJFYq",
+          "name": "mystilleef-pi-subagent-0.12.4-rodrigo.1.tgz",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/x-gtar",
+          "state": "uploaded",
+          "size": 107566,
+          "digest": "sha256:60e79f89811cfed4b9d4828558b115aaca9d1ca24b46dcd63169a9e2e0308ee4",
+          "download_count": 0,
+          "created_at": "2026-10-02T19:48:09Z",
+          "updated_at": "2026-10-02T19:48:10Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-subagent/releases/download/v0.12.4-rodrigo.1/mystilleef-pi-subagent-0.12.4-rodrigo.1.tgz",
+          "archive_path": "archive/pi-subagent/releases/402109490/mystilleef-pi-subagent-0.12.4-rodrigo.1.tgz",
+          "archive_sha256": "60e79f89811cfed4b9d4828558b115aaca9d1ca24b46dcd63169a9e2e0308ee4"
+        },
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/assets/606361126",
+          "id": 606361126,
+          "node_id": "RA_kwDOU5UtQM4kJFYm",
+          "name": "SHA256SUMS.txt",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "text/plain; charset=utf-8",
+          "state": "uploaded",
+          "size": 191,
+          "digest": "sha256:c9faf7363ca38fe34eca9f19bdd499965b9449290a166bd6cc53e9cf100e3f58",
+          "download_count": 0,
+          "created_at": "2026-10-02T19:48:09Z",
+          "updated_at": "2026-10-02T19:48:09Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-subagent/releases/download/v0.12.4-rodrigo.1/SHA256SUMS.txt",
+          "archive_path": "archive/pi-subagent/releases/402109490/SHA256SUMS.txt",
+          "archive_sha256": "c9faf7363ca38fe34eca9f19bdd499965b9449290a166bd6cc53e9cf100e3f58"
+        },
+        {
+          "url": "https://api.github.com/repos/rodrigojager/pi-subagent/releases/assets/606361131",
+          "id": 606361131,
+          "node_id": "RA_kwDOU5UtQM4kJFYr",
+          "name": "ui-preview.png",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "image/png",
+          "state": "uploaded",
+          "size": 55741,
+          "digest": "sha256:150821b77880f1517b96f2de7eb358430d86cbd2a25795ae4488efdab6802b85",
+          "download_count": 0,
+          "created_at": "2026-10-02T19:48:09Z",
+          "updated_at": "2026-10-02T19:48:09Z",
+          "browser_download_url": "https://github.com/rodrigojager/pi-subagent/releases/download/v0.12.4-rodrigo.1/ui-preview.png",
+          "archive_path": "archive/pi-subagent/releases/402109490/ui-preview.png",
+          "archive_sha256": "150821b77880f1517b96f2de7eb358430d86cbd2a25795ae4488efdab6802b85"
+        }
+      ],
+      "tarball_url": "https://api.github.com/repos/rodrigojager/pi-subagent/tarball/v0.12.4-rodrigo.1",
+      "zipball_url": "https://api.github.com/repos/rodrigojager/pi-subagent/zipball/v0.12.4-rodrigo.1",
+      "body": "Delegated work now displays the task and current activity before its metrics. Random adjective/noun nicknames are replaced by numbered runs such as `review #1` and `build #2`.\n\n- Compact live cards show the task without expansion; expanded cards retain its full normalized text.\n- `/jobs` shows tasks, live tool activity, and separate metric/model footers.\n- Completed and stopped cards retain the delegated task. Older records with legacy labels still render.\n- Unicode truncation preserves emoji and terminal column widths.\n\nThis is Rodrigo's UI fork of `mystilleef/pi-subagent` 0.12.4, based on commit `9d5c7501df9812394d2c881f6fc8f503d38b4531`. Original authorship and MIT license are preserved. Child process execution, agent definitions, model selection, nested delegation, cancellation, and result delivery retain the upstream behavior.\n\nValidation: `bun check` on Windows, `bun verify` on Ubuntu (1,837 tests passed), package-content validation (46 files, source hashes matched), and loading both source and packaged extension through the Pi 1.0.0 host loader. Tests cover simulated child processes; no paid model request was needed. The screenshot uses example data rendered by the plugin.\n\nSwitch the configured package:\n\n```sh\npi remove npm:@mystilleef/pi-subagent\npi install https://github.com/rodrigojager/pi-subagent\n```\n\nUse `/reload` in an existing Pi session. Keep one subagent implementation configured. Future updates: `pi update https://github.com/rodrigojager/pi-subagent`.\n\nDistribution is through this GitHub fork and its release assets; the upstream npm package is not republished. SHA-256 checksums are attached.\n"
+    }
+  ],
+  "issues": [],
+  "pull_requests": []
+}

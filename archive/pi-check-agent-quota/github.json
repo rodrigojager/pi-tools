@@ -1,0 +1,56 @@
+{
+  "repository": {
+    "id": 1376052317,
+    "full_name": "rodrigojager/pi-check-agent-quota",
+    "html_url": "https://github.com/rodrigojager/pi-check-agent-quota",
+    "description": null,
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-09-18T15:18:17Z",
+    "pushed_at": "2026-09-21T14:39:20Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": [],
+    "parent": {
+      "full_name": "Linen9/pi-check-agent-quota",
+      "html_url": "https://github.com/Linen9/pi-check-agent-quota",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "Linen9/pi-check-agent-quota",
+      "html_url": "https://github.com/Linen9/pi-check-agent-quota",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "1046d6b5e26081aa55c567b09738fa565fde6d68",
+  "default_tree": "f20de1d4f92fcacdc38512e71c11772952c7fa46",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "1046d6b5e26081aa55c567b09738fa565fde6d68",
+      "archive_ref": "refs/heads/archive/pi-check-agent-quota/main"
+    },
+    "refs/tags/v0.1.1": {
+      "sha": "5543fc6695a7fab84f2e57fb7af95fc8db0ff8f1",
+      "archive_ref": "refs/tags/archive/pi-check-agent-quota/v0.1.1"
+    },
+    "refs/tags/v0.1.2": {
+      "sha": "6191a028c83909834ea970a9d3fc378bc0fb8e58",
+      "archive_ref": "refs/tags/archive/pi-check-agent-quota/v0.1.2"
+    },
+    "refs/tags/v0.1.3": {
+      "sha": "7c30e16bbdf203b0413c04d0459daf5e719cb1f1",
+      "archive_ref": "refs/tags/archive/pi-check-agent-quota/v0.1.3"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

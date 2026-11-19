@@ -1,28 +1,37 @@
-# Higgsfield skill runtime
+# Pi Tools
 
-Rodrigo's reduced English library for the `higgsfield-specialist` Pi agent. The [higgsfield](higgsfield/SKILL.md) folder contains 36 skills and the production resources they use: creative references, templates, cached platform schemas, job memory, and delivery preflight helpers.
+A read-only archive of Rodrigo Jager's Pi Coding Agent projects. Each project keeps its original files, license, and default-branch snapshot.
 
-Reduced from 226 files to 120, from 6,669,808 bytes to approximately 2.62 MB. See [CHANGES.md](CHANGES.md) for the removed material and operational adaptations. This repository starts with the reduced bundle; the complete upstream package and its skill-development tests are not included.
+| Project | Description | GitHub records |
+| --- | --- | --- |
+| [higgsfield-skill-runtime](projects/higgsfield-skill-runtime) | Reduced English Higgsfield skills for Pi: 36 specialists, production references and delivery helpers | [Archive](archive/higgsfield-skill-runtime/github.json) |
+| [opencode-pi](projects/opencode-pi) | Bridge that runs free OpenCode models through the OpenCode CLI. | [Archive](archive/opencode-pi/github.json) |
+| [pi-agent-mailbox](projects/pi-agent-mailbox) | Coordinates subagent jobs through a local event-driven supervisor. | [Archive](archive/pi-agent-mailbox/github.json) |
+| [pi-agent-switcher](projects/pi-agent-switcher) | Searchable Alt+A primary-agent picker, scoped skills and delegation through Rodrigo’s existing Pi Subagent runtime | [Archive](archive/pi-agent-switcher/github.json) |
+| [pi-check-agent-quota](projects/pi-check-agent-quota) | Shows provider quotas, balances, and recent usage in the Pi terminal. | [Archive](archive/pi-check-agent-quota/github.json) |
+| [pi-codex-account-pool](projects/pi-codex-account-pool) | Multi-account ChatGPT OAuth pool for Pi Codex sessions | [Archive](archive/pi-codex-account-pool/github.json) |
+| [pi-extension-mermaid](projects/pi-extension-mermaid) | Pi package that renders Mermaid code blocks inline and opens a full viewer on demand | [Archive](archive/pi-extension-mermaid/github.json) |
+| [pi-extensions](projects/pi-extensions) | Collection of extensions and themes for Pi Coding Agent | [Archive](archive/pi-extensions/github.json) |
+| [pi-goal](projects/pi-goal) | Session goals with an optional Pi Agent Mailbox adapter. | [Archive](archive/pi-goal/github.json) |
+| [pi-goal-auto-approve](projects/pi-goal-auto-approve) | Pi extension that approves confirmation prompts only while a user-authorized goal is active | [Archive](archive/pi-goal-auto-approve/github.json) |
+| [pi-goal-highlight](projects/pi-goal-highlight) | Colored goal objective blocks for Pi 1.0, without changing prompts or goal lifecycle | [Archive](archive/pi-goal-highlight/github.json) |
+| [pi-guardian](projects/pi-guardian) | Reviews Pi tool calls against a written permission policy. | [Archive](archive/pi-guardian/github.json) |
+| [pi-herdr-status](projects/pi-herdr-status) | Rodrigo metadata-only pi-herdr-status alongside official Herdr lifecycle integration | [Archive](archive/pi-herdr-status/github.json) |
+| [pi-home-kit](projects/pi-home-kit) | Recreates Rodrigo’s Pi setup on another computer. | [Archive](archive/pi-home-kit/github.json) |
+| [pi-opencode-direct](projects/pi-opencode-direct) | OpenCode Zen and Go provider catalogs for Pi. | [Archive](archive/pi-opencode-direct/github.json) |
+| [pi-opencode-free](projects/pi-opencode-free) | Free OpenCode models in Pi, no API key | [Archive](archive/pi-opencode-free/github.json) |
+| [pi-prose-spacing-guard](projects/pi-prose-spacing-guard) | Flags suspicious run-together words in subagent handoffs. | [Archive](archive/pi-prose-spacing-guard/github.json) |
+| [pi-session-recall](projects/pi-session-recall) | Local-first Pi package for read-only session indexing and recall | [Archive](archive/pi-session-recall/github.json) |
+| [pi-sidebar-tui](projects/pi-sidebar-tui) | Terminal sidebar compatible with Pi Goal and rpiv-todo. | [Archive](archive/pi-sidebar-tui/github.json) |
+| [pi-subagent](projects/pi-subagent) | Nested agent delegation with a Pi interface and optional durable execution. | [Archive](archive/pi-subagent/github.json) |
+| [pi-workspace-search](projects/pi-workspace-search) | Bounded workspace retrieval for Pi with ripgrep, local zvec, and optional Jev classification | [Archive](archive/pi-workspace-search/github.json) |
+| [pi-zgrep](projects/pi-zgrep) | Semantic code search for the pi coding agent. One tool, four routes (hybrid, BM25, vector, ripgrep), auto-indexed. Powered by zg. | [Archive](archive/pi-zgrep/github.json) |
+| [rpiv-mono](projects/rpiv-mono) | Monorepo for @juicesharp/rpiv-* Pi plugins (lockstep versions, single install, single publish pipeline) | [Archive](archive/rpiv-mono/github.json) |
+| [rpiv-todo](projects/rpiv-todo) | Rodrigo standalone copy of rpiv-todo with official-todo history compatibility | [Archive](archive/rpiv-todo/github.json) |
 
-## Source and attribution
+## History and historical downloads
 
-Derived from [OSideMedia/higgsfield-ai-prompt-skill](https://github.com/OSideMedia/higgsfield-ai-prompt-skill), upstream tag `v3.40.0`, commit `70754977d1884794963ac0a748eaaa85b6e9c82a`. The original O-Side Media MIT attribution is preserved in [LICENSE](LICENSE) and the installed skill bundle. Local runtime version: `3.40.0-rodrigo.1`.
-
-## Use with Pi
-
-The installed library belongs at `~/.agents/skills/higgsfield`, shared globally. Pi discovers the root skill automatically; add `~/.agents/skills/higgsfield/skills` to the `skills` array in `~/.pi/agent/settings.json` to expose the 35 nested skills.
-
-The English [higgsfield-specialist profile and native MCP configuration](https://github.com/rodrigojager/pi-home-kit/tree/main/profiles/higgsfield-specialist) are published separately. The profile defaults to `openai-codex/gpt-6.1-sol`, high thinking, with the model and thinking selectable in Pi.
-
-Release ZIPs contain only the `higgsfield/` runtime folder. They contain no credentials. The local MCP sign-in remains `/mcp login higgsfield`; configuring a profile does not authenticate a service account.
-
-## Production helpers
-
-- `scripts/preflight.py`: checks request parameters, media roles, and cached platform constraints before execution.
-- `scripts/seedance_lint.py`: checks production prompt structure and known failure patterns.
-- `scripts/higgsfield_memory.py`: reads and records delivery outcomes, recalls known issues, and reports credit history and routing.
-- `scripts/sub_skill_descriptions.py`: the domain-skill roster required by routing memory.
-
-These helpers use Python's standard library. Cached schemas retain their dated platform provenance; verify live MCP schemas and costs before paid requests, especially when cached data is old or a model is unknown. The helpers do not submit paid generations.
-
-Delivery inputs and outputs belong in the current project's workspace; create the folders on demand. The shared installation contains skill resources rather than project deliverables.
+- Original branches are available as `archive/<project>/<branch>` and tags as `archive/<project>/<tag>`. Each ref retains its original Git object ID.
+- Each GitHub record includes the original repository metadata, ref mapping, and recorded releases. Downloadable release files live under `archive/<project>/releases/<release-id>/`. The corresponding GitHub record lists their paths and SHA-256 checksums.
+- The open `opencode-pi` pull request is preserved as a patch, conversation record, and `review/opencode-pi/1` branch. GitHub review and fork relationships belong to the original repository.
+- With access to this private archive, clone it to browse the original files and use each project's own setup instructions. Git install and update URLs for standalone repositories are not redirected here.

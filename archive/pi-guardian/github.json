@@ -1,0 +1,44 @@
+{
+  "repository": {
+    "id": 1376279915,
+    "full_name": "rodrigojager/pi-guardian",
+    "html_url": "https://github.com/rodrigojager/pi-guardian",
+    "description": null,
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-09-18T18:27:02Z",
+    "pushed_at": "2026-09-18T18:28:09Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": [],
+    "parent": {
+      "full_name": "erikus/pi-auto-approve",
+      "html_url": "https://github.com/erikus/pi-auto-approve",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "erikus/pi-auto-approve",
+      "html_url": "https://github.com/erikus/pi-auto-approve",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "94d398300e3efcddd73a4e2bc16759349b09cfa1",
+  "default_tree": "f7227add4fe3e6de2993a1a81ecc4e8c8a925ed6",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "94d398300e3efcddd73a4e2bc16759349b09cfa1",
+      "archive_ref": "refs/heads/archive/pi-guardian/main"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

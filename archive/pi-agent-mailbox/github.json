@@ -1,0 +1,34 @@
+{
+  "repository": {
+    "id": 1406428912,
+    "full_name": "rodrigojager/pi-agent-mailbox",
+    "html_url": "https://github.com/rodrigojager/pi-agent-mailbox",
+    "description": null,
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-05T22:11:06Z",
+    "pushed_at": "2026-10-06T03:36:07Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": []
+  },
+  "default_commit": "17fa3004a0fecb1f7bd0cd2ebfdf2b0dac8ec78a",
+  "default_tree": "5fc34120237d15cd359e6eb1a5dd967c0a39c9ba",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "17fa3004a0fecb1f7bd0cd2ebfdf2b0dac8ec78a",
+      "archive_ref": "refs/heads/archive/pi-agent-mailbox/main"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

@@ -1,0 +1,28 @@
+{
+  "repository": {
+    "id": 1430723735,
+    "full_name": "rodrigojager/pi-goal-auto-approve",
+    "html_url": "https://github.com/rodrigojager/pi-goal-auto-approve",
+    "description": "Pi extension that approves confirmation prompts only while a user-authorized goal is active",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-23T07:31:09Z",
+    "pushed_at": "2026-10-23T07:31:19Z",
+    "license": null,
+    "topics": []
+  },
+  "default_commit": "2d1281dfd32dd04a88a9b03794a47f72b7e4da0b",
+  "default_tree": "038dc499623846a8d4ae46630ec3143eb3ac5e28",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "2d1281dfd32dd04a88a9b03794a47f72b7e4da0b",
+      "archive_ref": "refs/heads/archive/pi-goal-auto-approve/main"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

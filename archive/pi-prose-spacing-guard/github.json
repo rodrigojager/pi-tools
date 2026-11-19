@@ -1,0 +1,28 @@
+{
+  "repository": {
+    "id": 1406695513,
+    "full_name": "rodrigojager/pi-prose-spacing-guard",
+    "html_url": "https://github.com/rodrigojager/pi-prose-spacing-guard",
+    "description": null,
+    "visibility": "private",
+    "default_branch": "main",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-06T04:37:05Z",
+    "pushed_at": "2026-10-06T04:37:11Z",
+    "license": null,
+    "topics": []
+  },
+  "default_commit": "74af88d273b7d1fc3bb75357eb12b3fc09011fe2",
+  "default_tree": "4e284beafbd6ba408c4a280da84fb6ddee82c1cd",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "74af88d273b7d1fc3bb75357eb12b3fc09011fe2",
+      "archive_ref": "refs/heads/archive/pi-prose-spacing-guard/main"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

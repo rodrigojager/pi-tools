@@ -1,0 +1,123 @@
+{
+  "repository": {
+    "id": 1402810680,
+    "full_name": "rodrigojager/pi-zgrep",
+    "html_url": "https://github.com/rodrigojager/pi-zgrep",
+    "description": "Semantic code search for the pi coding agent. One tool, four routes (hybrid, BM25, vector, ripgrep), auto-indexed. Powered by zg.",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": true,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-03T07:20:00Z",
+    "pushed_at": "2026-10-19T08:16:42Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": [],
+    "parent": {
+      "full_name": "carvalab/pi-zgrep",
+      "html_url": "https://github.com/carvalab/pi-zgrep",
+      "default_branch": "main"
+    },
+    "source": {
+      "full_name": "carvalab/pi-zgrep",
+      "html_url": "https://github.com/carvalab/pi-zgrep",
+      "default_branch": "main"
+    }
+  },
+  "default_commit": "89e1ec1be02550d5a3ae088aa0fba51014c21867",
+  "default_tree": "8dba97bc598496693669790039d4608048088a3a",
+  "git_refs": {
+    "refs/heads/brainstorm/pi-zg-v0.1": {
+      "sha": "14e95b5f78491e05c88aa8c5a6167cf12109a1c1",
+      "archive_ref": "refs/heads/archive/pi-zgrep/brainstorm/pi-zg-v0.1"
+    },
+    "refs/heads/main": {
+      "sha": "89e1ec1be02550d5a3ae088aa0fba51014c21867",
+      "archive_ref": "refs/heads/archive/pi-zgrep/main"
+    },
+    "refs/heads/pi-parallel-74464aa5-0": {
+      "sha": "10d2e1537d0ad9f42c4aafed461f88135ccd6941",
+      "archive_ref": "refs/heads/archive/pi-zgrep/pi-parallel-74464aa5-0"
+    },
+    "refs/tags/v0.1.0": {
+      "sha": "45edb0f94766e45ebb9414a7ba6789c590acb6c2",
+      "archive_ref": "refs/tags/archive/pi-zgrep/v0.1.0"
+    },
+    "refs/tags/v0.1.1": {
+      "sha": "2ae789b197def015def7b3a359e7c92cc69fe8e2",
+      "archive_ref": "refs/tags/archive/pi-zgrep/v0.1.1"
+    },
+    "refs/tags/v0.2.0": {
+      "sha": "b49575bd4980e36c6509fd0a6274a19a6544f2fb",
+      "archive_ref": "refs/tags/archive/pi-zgrep/v0.2.0"
+    },
+    "refs/tags/v0.2.1": {
+      "sha": "10197f572eb1d42f6ea419ba64dee11b534add67",
+      "archive_ref": "refs/tags/archive/pi-zgrep/v0.2.1"
+    },
+    "refs/tags/v0.2.2": {
+      "sha": "e94eed5d80f4a6e4babd6f52bea2d7a624132524",
+      "archive_ref": "refs/tags/archive/pi-zgrep/v0.2.2"
+    },
+    "refs/tags/v0.3.0": {
+      "sha": "59e6e4f0c8aeba9de1cba791d9629fa2b51dea21",
+      "archive_ref": "refs/tags/archive/pi-zgrep/v0.3.0"
+    },
+    "refs/tags/v0.3.1-rodrigo.1": {
+      "sha": "a52e0afa58730fb9dbf956d92d8886c0c966cb71",
+      "archive_ref": "refs/tags/archive/pi-zgrep/v0.3.1-rodrigo.1"
+    }
+  },
+  "releases": [
+    {
+      "url": "https://api.github.com/repos/rodrigojager/pi-zgrep/releases/402392164",
+      "assets_url": "https://api.github.com/repos/rodrigojager/pi-zgrep/releases/402392164/assets",
+      "upload_url": "https://uploads.github.com/repos/rodrigojager/pi-zgrep/releases/402392164/assets{?name,label}",
+      "html_url": "https://github.com/rodrigojager/pi-zgrep/releases/tag/v0.3.1-rodrigo.1",
+      "id": 402392164,
+      "author": {
+        "login": "rodrigojager",
+        "id": 49778489,
+        "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+        "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/rodrigojager",
+        "html_url": "https://github.com/rodrigojager",
+        "followers_url": "https://api.github.com/users/rodrigojager/followers",
+        "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+        "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+        "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+        "repos_url": "https://api.github.com/users/rodrigojager/repos",
+        "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "node_id": "RE_kwDOU50xOM4X_ARk",
+      "tag_name": "v0.3.1-rodrigo.1",
+      "target_commitish": "main",
+      "name": "v0.3.1-rodrigo.1 — Windows-compatible pi-zgrep",
+      "draft": false,
+      "immutable": false,
+      "prerelease": false,
+      "created_at": "2026-10-03T07:35:20Z",
+      "updated_at": "2026-10-03T07:37:40Z",
+      "published_at": "2026-10-03T07:37:40Z",
+      "assets": [],
+      "tarball_url": "https://api.github.com/repos/rodrigojager/pi-zgrep/tarball/v0.3.1-rodrigo.1",
+      "zipball_url": "https://api.github.com/repos/rodrigojager/pi-zgrep/zipball/v0.3.1-rodrigo.1",
+      "body": "Windows-compatible fork of the complete carvalab/pi-zgrep 0.3.0 package and history.\n\nAll four search modes, query filters, preview/refresh, slash commands and completions, automatic indexing, daemon reuse, binary resolution, installation fallbacks, and environment opt-outs are retained.\n\nFixes cover Windows process/shim and daemon launching, quoted roots and valued index arguments, filenames with spaces/drive letters, explicit query errors, stderr progress, current-call cancellation, and empty-result parsing.\n\nIncludes an English workspace-search skill and the local Pi integration/profile changes. Details: WINDOWS.md.\n\nValidated on Windows x64, Node 26.1.0, Pi 1.0.0 and zvec-grep 0.2.2: lint, formatting, type checks, 62 regression tests, two real-engine E2E tests, 13 isolated Pi SDK checks, and the installed Pi tool/skill/profile configuration. No model-inference requests were made by these checks.\n\nInstall: pi install git:github.com/rodrigojager/pi-zgrep@v0.3.1-rodrigo.1\n\nThis fork is distributed on GitHub; npm publication is disabled."
+    }
+  ],
+  "issues": [],
+  "pull_requests": []
+}

@@ -1,0 +1,606 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve, basename } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { EventEmitter } from 'node:events';
+import { fileURLToPath } from 'node:url';
+import { createJiti } from 'jiti';
+import { createSupervisor } from '../src/supervisor.mjs';
+import { MailboxClient, ensureToken } from '../src/client.mjs';
+import { statePath } from '../src/protocol.mjs';
+
+const jiti = createJiti(import.meta.url);
+const { default: registerAgentMailbox } = await jiti.import('../src/index.ts');
+
+test('legacy mode remains selectable for new jobs while the mailbox stays loaded', async () => {
+  const branch = [];
+  const commands = new Map();
+  const pi = {
+    events: new EventEmitter(),
+    on() {},
+    appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+    registerCommand(name, command) { commands.set(name, command); },
+    registerTool() {},
+  };
+  const ctx = {
+    ui: { notify() {} },
+    sessionManager: { getSessionId: () => randomUUID(), getBranch: () => branch },
+  };
+  registerAgentMailbox(pi);
+  let acceptCount = 0;
+  const probe = () => {
+    pi.events.emit('rodrigojager:pi-agent-mailbox:request:v1', {
+      context: ctx, accept: () => { acceptCount++; },
+    });
+  };
+  probe();
+  assert.equal(acceptCount, 1);
+  await commands.get('mailbox').handler('legacy', ctx);
+  probe();
+  assert.equal(acceptCount, 1);
+  await commands.get('mailbox').handler('durable', ctx);
+  probe();
+  assert.equal(acceptCount, 2);
+});
+
+async function until(check, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (!check()) {
+    if (Date.now() > deadline) throw new Error('Timed out waiting for fixture event');
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
+}
+
+test('a result stays with its branch and ACK follows recorded history', async () => {
+  const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+  const target = resolve(baseDir);
+  const sessionId = randomUUID();
+  let supervisor;
+  let inspector;
+  try {
+    ensureToken(sessionId, baseDir);
+    supervisor = createSupervisor({ sessionId, baseDir });
+    await supervisor.listen();
+    const handlers = new Map();
+    const sent = [];
+    let branch = [];
+    const originalBranch = branch;
+    const ctx = {
+      cwd: baseDir,
+      hasUI: false,
+      ui: { setStatus() {}, notify() {} },
+      sessionManager: {
+        getSessionId: () => sessionId,
+        getBranch: () => branch,
+        getLeafId: () => branch.at(-1)?.id ?? null,
+      },
+    };
+    const pi = {
+      events: new EventEmitter(),
+      on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+      appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+      sendMessage(message, options) { sent.push({ message, options }); },
+      registerCommand() {},
+      registerTool() {},
+    };
+    registerAgentMailbox(pi, { baseDir });
+    let start;
+    pi.events.emit('rodrigojager:pi-agent-mailbox:request:v1', {
+      context: ctx, accept: handler => { start = handler; },
+    });
+    assert.equal(typeof start, 'function');
+    const jobId = randomUUID();
+    const adapterPath = fileURLToPath(new URL('./fake-adapter.mjs', import.meta.url));
+    await start({ jobId, delayMs: 100 }, adapterPath);
+    assert.equal(originalBranch.some(entry => entry.customType === 'mailbox-workflow'), true);
+
+    // A different branch of the same session must not receive this result.
+    branch = [];
+    inspector = await MailboxClient.connect({ sessionId, baseDir, token: ensureToken(sessionId, baseDir) });
+    await until(() => supervisor.store.getJob(jobId)?.state === 'succeeded');
+    await new Promise(resolve => setTimeout(resolve, 20));
+    assert.equal(sent.length, 0);
+    assert.equal(supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(`result:${jobId}`).state, 'pending');
+
+    branch = originalBranch;
+    for (const handler of handlers.get('session_tree') ?? []) handler({ oldLeafId: null, newLeafId: null }, ctx);
+    await until(() => sent.length === 1);
+    assert.equal(sent[0].message.customType, 'subagent-result');
+    assert.equal(sent[0].message.details.mailboxEventId, `result:${jobId}`);
+    await new Promise(resolve => setTimeout(resolve, 20));
+    assert.equal(supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(`result:${jobId}`).state, 'pending');
+
+    branch.push({ id: 'history-result', type: 'custom_message', customType: 'subagent-result', details: sent[0].message.details });
+    for (const handler of handlers.get('message_end') ?? []) handler({}, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(`result:${jobId}`).state === 'recorded');
+    assert.equal(supervisor.store.db.prepare('SELECT entry_id FROM deliveries WHERE event_id=?').get(`result:${jobId}`).entry_id, 'history-result');
+    const largeJobId = randomUUID();
+    await start({ jobId: largeJobId, summaryLength: 1200000 }, adapterPath);
+    await until(() => sent.length === 2);
+    assert.ok(sent[1].message.content.length < 10000, 'the model-facing result must stay bounded');
+    assert.match(sent[1].message.content, /Full result artifact:/);
+    const artifact = join(statePath(baseDir, sessionId), 'artifacts', `${largeJobId}.json`);
+    assert.equal(JSON.parse(readFileSync(artifact, 'utf8')).summary.length, 1200000);
+    await until(() => sent.length === 3, 8000);
+    assert.equal(sent[2].message.details.mailboxEventId, `result:${largeJobId}`, 'an unrecorded result is retried by event ID');
+    assert.equal(supervisor.store.db.prepare('SELECT COUNT(*) AS count FROM events WHERE event_id=?').get(`result:${largeJobId}`).count, 1);
+    branch.push({ id: 'large-history-result', type: 'custom_message', customType: 'subagent-result', details: sent[2].message.details });
+    for (const handler of handlers.get('message_end') ?? []) handler({}, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(`result:${largeJobId}`).state === 'recorded');
+    for (const handler of handlers.get('session_shutdown') ?? []) handler({}, ctx);
+  } finally {
+    inspector?.close();
+    await supervisor?.close();
+    if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+    if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('a Pi restart after enqueue but before history recording replays the same result without ACK or rerun', async () => {
+  const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+  const target = resolve(baseDir);
+  const sessionId = randomUUID();
+  const workflowId = randomUUID();
+  const jobId = randomUUID();
+  const eventId = `result:${jobId}`;
+  const branch = [{ id: 'workflow', type: 'custom', customType: 'mailbox-workflow',
+    data: { id: workflowId, sessionId } }];
+  const ctx = { hasUI: false, ui: { setStatus() {}, notify() {} },
+    sessionManager: { getSessionId: () => sessionId, getBranch: () => branch } };
+  const sent = [];
+  const createPi = () => {
+    const handlers = new Map();
+    const pi = {
+      events: new EventEmitter(),
+      on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+      appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+      sendMessage(message) { sent.push(message); },
+      registerCommand() {}, registerTool() {},
+    };
+    registerAgentMailbox(pi, { baseDir });
+    return handlers;
+  };
+  let supervisor;
+  try {
+    ensureToken(sessionId, baseDir);
+    supervisor = createSupervisor({ sessionId, baseDir });
+    await supervisor.listen();
+    const first = createPi();
+    for (const handler of first.get('session_start') ?? []) handler({}, ctx);
+    await until(() => supervisor.ownerPresent());
+    supervisor.store.registerJob({ jobId, coordinatorId: sessionId, workflowId });
+    supervisor.publish({ eventId, jobId, eventType: 'terminal', executionState: 'succeeded',
+      payload: { summary: 'committed before Pi history' } });
+    await until(() => sent.length === 1);
+    assert.equal(sent[0].details.mailboxEventId, eventId);
+    assert.equal(supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state, 'pending');
+    for (const handler of first.get('session_shutdown') ?? []) handler({}, ctx);
+    await until(() => !supervisor.ownerPresent());
+
+    const second = createPi();
+    for (const handler of second.get('session_start') ?? []) handler({}, ctx);
+    await until(() => sent.length === 2);
+    assert.equal(sent[1].details.mailboxEventId, eventId);
+    assert.equal(supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state, 'pending');
+    branch.push({ id: 'recorded-after-restart', type: 'custom_message', customType: 'subagent-result',
+      details: sent[1].details });
+    for (const handler of second.get('message_end') ?? []) handler({}, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state === 'recorded');
+    assert.equal(supervisor.store.db.prepare('SELECT entry_id FROM deliveries WHERE event_id=?').get(eventId).entry_id,
+      'recorded-after-restart');
+    assert.equal(supervisor.store.db.prepare('SELECT COUNT(*) AS n FROM events WHERE event_id=?').get(eventId).n, 1);
+    for (const handler of second.get('session_shutdown') ?? []) handler({}, ctx);
+  } finally {
+    await supervisor?.close();
+    if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+    if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('a Pi restart after history recording but before ACK confirms it without resending', async () => {
+  const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+  const target = resolve(baseDir);
+  const sessionId = randomUUID();
+  const workflowId = randomUUID();
+  const jobId = randomUUID();
+  const eventId = `result:${jobId}`;
+  const branch = [{ id: 'workflow', type: 'custom', customType: 'mailbox-workflow',
+    data: { id: workflowId, sessionId } }];
+  const ctx = { hasUI: false, ui: { setStatus() {}, notify() {} },
+    sessionManager: { getSessionId: () => sessionId, getBranch: () => branch } };
+  const sent = [];
+  const createPi = () => {
+    const handlers = new Map();
+    const pi = {
+      events: new EventEmitter(),
+      on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+      appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+      sendMessage(message) { sent.push(message); },
+      registerCommand() {}, registerTool() {},
+    };
+    registerAgentMailbox(pi, { baseDir });
+    return handlers;
+  };
+  let supervisor;
+  try {
+    ensureToken(sessionId, baseDir);
+    supervisor = createSupervisor({ sessionId, baseDir });
+    await supervisor.listen();
+    const first = createPi();
+    for (const handler of first.get('session_start') ?? []) handler({}, ctx);
+    await until(() => supervisor.ownerPresent());
+    supervisor.store.registerJob({ jobId, coordinatorId: sessionId, workflowId });
+    supervisor.publish({ eventId, jobId, eventType: 'terminal', executionState: 'succeeded',
+      payload: { summary: 'history survives unacknowledged Pi restart' } });
+    await until(() => sent.length === 1);
+    branch.push({ id: 'history-before-ack', type: 'custom_message', customType: 'subagent-result',
+      details: sent[0].details });
+    assert.equal(supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state, 'pending');
+    for (const handler of first.get('session_shutdown') ?? []) handler({}, ctx);
+    await until(() => !supervisor.ownerPresent());
+
+    const second = createPi();
+    for (const handler of second.get('session_start') ?? []) handler({}, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state === 'recorded');
+    assert.equal(sent.length, 1);
+    assert.equal(supervisor.store.db.prepare('SELECT entry_id FROM deliveries WHERE event_id=?').get(eventId).entry_id,
+      'history-before-ack');
+    for (const handler of second.get('session_shutdown') ?? []) handler({}, ctx);
+  } finally {
+    await supervisor?.close();
+    if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+    if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('a failed Pi message enqueue retries the committed result before acknowledging history', async () => {
+  const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+  const target = resolve(baseDir);
+  const sessionId = randomUUID();
+  const workflowId = randomUUID();
+  const jobId = randomUUID();
+  const eventId = `result:${jobId}`;
+  const branch = [
+    { id: 'workflow', type: 'custom', customType: 'mailbox-workflow', data: { id: workflowId, sessionId } },
+  ];
+  const handlers = new Map();
+  const sent = [];
+  let attempts = 0;
+  let supervisor;
+  try {
+    ensureToken(sessionId, baseDir);
+    supervisor = createSupervisor({ sessionId, baseDir });
+    await supervisor.listen();
+    const ctx = {
+      hasUI: false,
+      ui: { setStatus() {}, notify() {} },
+      sessionManager: { getSessionId: () => sessionId, getBranch: () => branch },
+    };
+    const pi = {
+      events: new EventEmitter(),
+      on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+      appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+      sendMessage(message, options) {
+        attempts++;
+        if (attempts === 1) throw new Error('simulated Pi enqueue failure');
+        sent.push({ message, options });
+      },
+      registerCommand() {}, registerTool() {},
+    };
+    registerAgentMailbox(pi, { baseDir });
+    for (const handler of handlers.get('session_start') ?? []) handler({}, ctx);
+    await until(() => supervisor.ownerPresent());
+    supervisor.store.registerJob({ jobId, coordinatorId: sessionId, workflowId });
+    supervisor.publish({ eventId, jobId, eventType: 'terminal', executionState: 'succeeded',
+      payload: { summary: 'result survives failed enqueue' } });
+    await until(() => attempts === 1);
+    assert.equal(supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state, 'pending');
+    await until(() => sent.length === 1, 8000);
+    assert.equal(attempts, 2);
+    assert.equal(sent[0].message.details.mailboxEventId, eventId);
+    assert.equal(supervisor.store.db.prepare('SELECT COUNT(*) AS n FROM events WHERE event_id=?').get(eventId).n, 1);
+    assert.equal(supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state, 'pending');
+    branch.push({ id: 'recorded-after-retry', type: 'custom_message', customType: 'subagent-result',
+      details: sent[0].message.details });
+    for (const handler of handlers.get('message_end') ?? []) handler({}, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId).state === 'recorded');
+    assert.equal(supervisor.store.db.prepare('SELECT entry_id FROM deliveries WHERE event_id=?').get(eventId).entry_id,
+      'recorded-after-retry');
+    for (const handler of handlers.get('session_shutdown') ?? []) handler({}, ctx);
+  } finally {
+    await supervisor?.close();
+    if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+    if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('a transient ACK failure retries without sending the recorded result again', async () => {
+  const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+  const target = resolve(baseDir);
+  const sessionId = randomUUID();
+  const workflowId = randomUUID();
+  const jobId = randomUUID();
+  const eventId = `result:${jobId}`;
+  const branch = [{ id: 'workflow', type: 'custom', customType: 'mailbox-workflow',
+    data: { id: workflowId, sessionId } }];
+  const handlers = new Map();
+  const sent = [];
+  let attempts = 0;
+  let supervisor;
+  try {
+    ensureToken(sessionId, baseDir);
+    supervisor = createSupervisor({ sessionId, baseDir });
+    await supervisor.listen();
+    const originalAck = supervisor.store.ack.bind(supervisor.store);
+    supervisor.store.ack = (id, entryId) => {
+      attempts++;
+      if (attempts === 1) throw new Error('transient ACK failure');
+      return originalAck(id, entryId);
+    };
+    const ctx = { hasUI: false, ui: { setStatus() {}, notify() {} },
+      sessionManager: { getSessionId: () => sessionId, getBranch: () => branch } };
+    const pi = {
+      events: new EventEmitter(),
+      on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+      appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+      sendMessage(message, options) { sent.push({ message, options }); },
+      registerCommand() {}, registerTool() {},
+    };
+    registerAgentMailbox(pi, { baseDir });
+    for (const handler of handlers.get('session_start') ?? []) handler({}, ctx);
+    await until(() => supervisor.ownerPresent());
+    supervisor.store.registerJob({ jobId, coordinatorId: sessionId, workflowId });
+    supervisor.publish({ eventId, jobId, eventType: 'terminal', executionState: 'succeeded',
+      payload: { summary: 'result recorded before ACK retry' } });
+    await until(() => sent.length === 1);
+    branch.push({ id: 'recorded-before-retry', type: 'custom_message', customType: 'subagent-result',
+      details: sent[0].message.details });
+    for (const handler of handlers.get('message_end') ?? []) handler({}, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?')
+      .get(eventId)?.state === 'recorded', 5000);
+    assert.equal(attempts, 2);
+    assert.equal(sent.length, 1);
+    assert.equal(supervisor.store.db.prepare('SELECT entry_id FROM deliveries WHERE event_id=?')
+      .get(eventId).entry_id, 'recorded-before-retry');
+    for (const handler of handlers.get('session_shutdown') ?? []) handler({}, ctx);
+  } finally {
+    await supervisor?.close();
+    if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+    if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('fork and ancestor navigation keep pending results owned by the original branch', async () => {
+  const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+  const target = resolve(baseDir);
+  const sessionId = randomUUID();
+  const workflowId = randomUUID();
+  const root = { id: 'root', type: 'message' };
+  const marker = { id: 'workflow-marker', type: 'custom', customType: 'mailbox-workflow', data: { id: workflowId, sessionId } };
+  const original = [root, marker, { id: 'original-leaf', type: 'message' }];
+  const fork = [root, marker, { id: 'fork-leaf', type: 'message' }];
+  const ancestor = [root, marker];
+  const branches = [original, fork, ancestor];
+  let current = original;
+  let supervisor;
+  try {
+    ensureToken(sessionId, baseDir);
+    supervisor = createSupervisor({ sessionId, baseDir });
+    await supervisor.listen();
+    const handlers = new Map();
+    const sent = [];
+    const ctx = {
+      hasUI: false,
+      ui: { setStatus() {}, notify() {} },
+      sessionManager: {
+        getSessionId: () => sessionId,
+        getBranch: leafId => leafId ? branches.find(branch => branch.at(-1)?.id === leafId) : current,
+        getLeafId: () => current.at(-1)?.id ?? null,
+      },
+    };
+    const pi = {
+      events: new EventEmitter(),
+      on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+      appendEntry(customType, data) { current.push({ id: randomUUID(), type: 'custom', customType, data }); },
+      sendMessage(message, options) { sent.push({ message, options }); },
+      registerCommand() {}, registerTool() {},
+    };
+    registerAgentMailbox(pi, { baseDir });
+    const navigate = (branch) => {
+      const oldLeafId = current.at(-1)?.id;
+      current = branch;
+      for (const handler of handlers.get('session_tree') ?? []) handler({ oldLeafId, newLeafId: current.at(-1)?.id }, ctx);
+    };
+
+    navigate(fork);
+    const forkWorkflow = fork.at(-1)?.data?.id;
+    assert.ok(forkWorkflow && forkWorkflow !== workflowId, 'a fork must get its own workflow');
+    for (const handler of handlers.get('session_start') ?? []) handler({}, ctx);
+    await until(() => supervisor.ownerPresent());
+    supervisor.store.registerJob({ jobId: 'original-job', coordinatorId: sessionId, workflowId });
+    supervisor.publish({ eventId: 'original-result', jobId: 'original-job', eventType: 'terminal', executionState: 'succeeded', payload: { summary: 'belongs to original' } });
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(sent.length, 0, 'the fork must not receive an original-branch result');
+
+    navigate(original);
+    assert.equal(original.at(-1)?.id, 'original-leaf', 'returning must not overwrite the original workflow');
+    await until(() => sent.length === 1);
+    assert.equal(sent[0].message.details.mailboxEventId, 'original-result');
+    original.push({ id: 'original-history', type: 'custom_message', customType: 'subagent-result', details: sent[0].message.details });
+    for (const handler of handlers.get('message_end') ?? []) handler({}, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get('original-result')?.state === 'recorded');
+
+    supervisor.store.registerJob({ jobId: 'ancestor-job', coordinatorId: sessionId, workflowId });
+    navigate(ancestor);
+    const ancestorWorkflow = ancestor.at(-1)?.data?.id;
+    assert.ok(ancestorWorkflow && ancestorWorkflow !== workflowId, 'rewinding to an ancestor must isolate a new branch');
+    supervisor.publish({ eventId: 'ancestor-result', jobId: 'ancestor-job', eventType: 'terminal', executionState: 'succeeded', payload: { summary: 'return to original' } });
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(sent.length, 1, 'the ancestor branch must not receive a later original result');
+    navigate(original);
+    assert.equal(original.at(-1)?.id, 'original-history', 'returning again must preserve its workflow');
+    await until(() => sent.length === 2);
+    assert.equal(sent[1].message.details.mailboxEventId, 'ancestor-result');
+    for (const handler of handlers.get('session_shutdown') ?? []) handler({}, ctx);
+  } finally {
+    await supervisor?.close();
+    if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+    if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('goal all wait stays quiet on partial completion and sends one grouped result', async () => {
+  const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+  const target = resolve(baseDir);
+  const sessionId = randomUUID();
+  const workflowId = randomUUID();
+  const goalId = randomUUID();
+  const branch = [
+    { id: 'workflow-marker', type: 'custom', customType: 'mailbox-workflow', data: { id: workflowId, sessionId } },
+    { id: 'goal-marker', type: 'custom', customType: 'goal-state', data: { goal: { id: goalId, status: 'active', waiting: { reason: 'children' } } } },
+  ];
+  let supervisor;
+  let client;
+  try {
+    const token = ensureToken(sessionId, baseDir);
+    supervisor = createSupervisor({ sessionId, baseDir });
+    await supervisor.listen();
+    client = await MailboxClient.connect({ sessionId, baseDir, token });
+    for (const jobId of ['first', 'second']) {
+      await client.request('register', { job: { jobId, coordinatorId: sessionId, workflowId } });
+    }
+    client.close();
+    client = undefined;
+    await until(() => !supervisor.ownerPresent());
+    const handlers = new Map();
+    const sent = [];
+    const ctx = {
+      hasUI: false,
+      ui: { setStatus() {}, notify() {} },
+      sessionManager: { getSessionId: () => sessionId, getBranch: () => branch },
+    };
+    const pi = {
+      events: new EventEmitter(),
+      on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+      appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+      sendMessage(message, options) { sent.push({ message, options }); },
+      registerCommand() {}, registerTool() {},
+    };
+    registerAgentMailbox(pi, { baseDir });
+    let bridge;
+    pi.events.emit('pi:agent-job-wait:v1', {
+      context: ctx, accept: value => { bridge = value; },
+    });
+    const armed = await bridge.arm({ goalId, jobIds: ['first', 'second'], mode: 'all' });
+    assert.equal(armed.ready, false);
+    supervisor.publish({ eventId: 'first-result', jobId: 'first', eventType: 'terminal', executionState: 'succeeded', payload: { summary: 'first done' } });
+    bridge.commit(armed.waitId);
+    for (const handler of handlers.get('agent_settled') ?? []) handler({}, ctx);
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(sent.length, 0);
+    supervisor.publish({ eventId: 'second-progress', jobId: 'second', eventType: 'progress', payload: { activity: 'still running' } });
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(sent.length, 0, 'progress during an all-wait must not wake the model');
+    supervisor.publish({ eventId: 'second-result', jobId: 'second', eventType: 'terminal', executionState: 'succeeded', payload: { summary: 'second done' } });
+    await until(() => sent.length === 1);
+    assert.deepEqual(sent[0].message.details.mailboxEventIds, ['first-result', 'second-result']);
+    assert.match(sent[0].message.content, /first done[\s\S]*second done/);
+    assert.equal(sent[0].options.triggerTurn, true);
+    branch.push({ id: 'grouped-history', type: 'custom_message', customType: 'subagent-result', details: sent[0].message.details });
+    for (const handler of handlers.get('message_end') ?? []) handler({}, ctx);
+    await until(() => ['first-result', 'second-result'].every(eventId =>
+      supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(eventId)?.state === 'recorded'));
+    branch.push({ id: 'replacement-goal', type: 'custom', customType: 'goal-state', data: { goal: { id: 'new-goal', status: 'active', waiting: { reason: 'new work' } } } });
+    for (const handler of handlers.get('session_tree') ?? []) handler({ oldLeafId: null, newLeafId: null }, ctx);
+    await until(() => supervisor.store.db.prepare('SELECT state FROM waits WHERE wait_id=?').get(armed.waitId)?.state === 'cancelled');
+    supervisor.store.registerJob({ jobId: 'old-goal-job', coordinatorId: sessionId, workflowId, goalId });
+    supervisor.publish({ eventId: 'old-goal-result', jobId: 'old-goal-job', eventType: 'terminal', executionState: 'succeeded', payload: { summary: 'late old result' } });
+    await until(() => sent.length === 2);
+    assert.equal(sent[1].options.triggerTurn, false, 'a result from an old goal must not wake its replacement');
+    for (const handler of handlers.get('session_shutdown') ?? []) handler({}, ctx);
+  } finally {
+    client?.close();
+    await supervisor?.close();
+    if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+    if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('stopped and completed goals record late results without waking the model', async () => {
+  for (const status of ['paused', 'blocked', 'usage_limited', 'budget_limited', 'complete']) {
+    const baseDir = mkdtempSync(join(tmpdir(), 'pi-mailbox-extension-test-'));
+    const target = resolve(baseDir);
+    const sessionId = randomUUID();
+    const workflowId = randomUUID();
+    const goalId = randomUUID();
+    const jobId = `late-${status}`;
+    const branch = [
+      { id: 'workflow-marker', type: 'custom', customType: 'mailbox-workflow', data: { id: workflowId, sessionId } },
+      { id: 'goal-active', type: 'custom', customType: 'goal-state', data: { goal: { id: goalId, status: 'active', waiting: { reason: 'child' } } } },
+    ];
+    let supervisor;
+    let client;
+    try {
+      ensureToken(sessionId, baseDir);
+      supervisor = createSupervisor({ sessionId, baseDir });
+      await supervisor.listen();
+      client = await MailboxClient.connect({ sessionId, baseDir, token: ensureToken(sessionId, baseDir) });
+      await client.request('register', { job: { jobId, coordinatorId: sessionId, workflowId, goalId } });
+      client.close();
+      client = undefined;
+      await until(() => !supervisor.ownerPresent());
+      const handlers = new Map();
+      const sent = [];
+      const ctx = {
+        hasUI: false,
+        ui: { setStatus() {}, notify() {} },
+        sessionManager: { getSessionId: () => sessionId, getBranch: () => branch },
+      };
+      const pi = {
+        events: new EventEmitter(),
+        on(name, handler) { handlers.set(name, [...(handlers.get(name) ?? []), handler]); },
+        appendEntry(customType, data) { branch.push({ id: randomUUID(), type: 'custom', customType, data }); },
+        sendMessage(message, options) { sent.push({ message, options }); },
+        registerCommand() {}, registerTool() {},
+      };
+      registerAgentMailbox(pi, { baseDir });
+      let bridge;
+      pi.events.emit('pi:agent-job-wait:v1', { context: ctx, accept: value => { bridge = value; } });
+      const armed = await bridge.arm({ goalId, jobIds: [jobId], mode: 'all' });
+      assert.equal(armed.ready, false, status);
+      bridge.commit(armed.waitId);
+      branch.push({ id: `goal-${status}`, type: 'custom', customType: 'goal-state', data: { goal: { id: goalId, status } } });
+      supervisor.publish({ eventId: `result-${status}`, jobId,
+        eventType: 'terminal', executionState: 'succeeded', payload: { summary: `late ${status} result` } });
+      await until(() => sent.length === 1);
+      assert.equal(sent[0].options.triggerTurn, false, status);
+      assert.match(sent[0].message.content, new RegExp(`late ${status} result`));
+      await until(() => supervisor.store.db.prepare('SELECT state FROM waits WHERE wait_id=?').get(armed.waitId)?.state === 'cancelled');
+      branch.push({ id: `history-${status}`, type: 'custom_message', customType: 'subagent-result', details: sent[0].message.details });
+      for (const handler of handlers.get('message_end') ?? []) handler({}, ctx);
+      await until(() => supervisor.store.db.prepare('SELECT state FROM deliveries WHERE event_id=?').get(`result-${status}`)?.state === 'recorded');
+      if (status !== 'complete') {
+        branch.push({ id: `resume-${status}`, type: 'custom', customType: 'goal-state', data: { goal: { id: goalId, status: 'active' } } });
+        for (const handler of handlers.get('session_tree') ?? []) handler({ oldLeafId: null, newLeafId: null }, ctx);
+        await new Promise(resolve => setTimeout(resolve, 20));
+        assert.equal(sent.length, 1, `resume from ${status} must not duplicate a recorded result`);
+      }
+      for (const handler of handlers.get('session_shutdown') ?? []) handler({}, ctx);
+    } finally {
+      client?.close();
+      await supervisor?.close();
+      if (!target.startsWith(resolve(tmpdir()) + '\\') && !target.startsWith(resolve(tmpdir()) + '/')) throw new Error('Refusing to delete outside temp');
+      if (!basename(target).startsWith('pi-mailbox-extension-test-')) throw new Error('Unexpected fixture name');
+      rmSync(target, { recursive: true, force: true });
+    }
+  }
+});

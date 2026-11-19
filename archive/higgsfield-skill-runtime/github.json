@@ -1,0 +1,120 @@
+{
+  "repository": {
+    "id": 1402565138,
+    "full_name": "rodrigojager/higgsfield-skill-runtime",
+    "html_url": "https://github.com/rodrigojager/higgsfield-skill-runtime",
+    "description": "Reduced English Higgsfield skills for Pi: 36 specialists, production references and delivery helpers",
+    "visibility": "public",
+    "default_branch": "main",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-10-03T02:32:01Z",
+    "pushed_at": "2026-10-03T02:32:08Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": []
+  },
+  "default_commit": "e01bec3003eb7e98e17d0fa259acb40446b87a92",
+  "default_tree": "2c1b9337d032c721cb5fd05991bb8074681608b8",
+  "git_refs": {
+    "refs/heads/main": {
+      "sha": "e01bec3003eb7e98e17d0fa259acb40446b87a92",
+      "archive_ref": "refs/heads/archive/higgsfield-skill-runtime/main"
+    },
+    "refs/tags/v3.40.0-rodrigo.1": {
+      "sha": "af88cfb6fada47912d8a54da71afeb4181eec6b7",
+      "archive_ref": "refs/tags/archive/higgsfield-skill-runtime/v3.40.0-rodrigo.1"
+    }
+  },
+  "releases": [
+    {
+      "url": "https://api.github.com/repos/rodrigojager/higgsfield-skill-runtime/releases/402283959",
+      "assets_url": "https://api.github.com/repos/rodrigojager/higgsfield-skill-runtime/releases/402283959/assets",
+      "upload_url": "https://uploads.github.com/repos/rodrigojager/higgsfield-skill-runtime/releases/402283959/assets{?name,label}",
+      "html_url": "https://github.com/rodrigojager/higgsfield-skill-runtime/releases/tag/v3.40.0-rodrigo.1",
+      "id": 402283959,
+      "author": {
+        "login": "rodrigojager",
+        "id": 49778489,
+        "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+        "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/rodrigojager",
+        "html_url": "https://github.com/rodrigojager",
+        "followers_url": "https://api.github.com/users/rodrigojager/followers",
+        "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+        "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+        "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+        "repos_url": "https://api.github.com/users/rodrigojager/repos",
+        "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "node_id": "RE_kwDOU5lyEs4X-l23",
+      "tag_name": "v3.40.0-rodrigo.1",
+      "target_commitish": "main",
+      "name": "v3.40.0-rodrigo.1 — reduced production runtime",
+      "draft": false,
+      "immutable": false,
+      "prerelease": false,
+      "created_at": "2026-10-03T02:31:07Z",
+      "updated_at": "2026-10-03T02:32:11Z",
+      "published_at": "2026-10-03T02:32:11Z",
+      "assets": [
+        {
+          "url": "https://api.github.com/repos/rodrigojager/higgsfield-skill-runtime/releases/assets/606985140",
+          "id": 606985140,
+          "node_id": "RA_kwDOU5lyEs4kLdu0",
+          "name": "higgsfield-runtime-3.40.0-rodrigo.1.zip",
+          "label": "",
+          "uploader": {
+            "login": "rodrigojager",
+            "id": 49778489,
+            "node_id": "MDQ6VXNlcjQ5Nzc4NDg5",
+            "avatar_url": "https://avatars.githubusercontent.com/u/49778489?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/rodrigojager",
+            "html_url": "https://github.com/rodrigojager",
+            "followers_url": "https://api.github.com/users/rodrigojager/followers",
+            "following_url": "https://api.github.com/users/rodrigojager/following{/other_user}",
+            "gists_url": "https://api.github.com/users/rodrigojager/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/rodrigojager/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/rodrigojager/subscriptions",
+            "organizations_url": "https://api.github.com/users/rodrigojager/orgs",
+            "repos_url": "https://api.github.com/users/rodrigojager/repos",
+            "events_url": "https://api.github.com/users/rodrigojager/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/rodrigojager/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "content_type": "application/zip",
+          "state": "uploaded",
+          "size": 879379,
+          "digest": "sha256:d85cca596329471dd6e5b38b19f07f90770e152e83d5be7ac7fd304a1df27cd7",
+          "download_count": 0,
+          "created_at": "2026-10-03T02:32:10Z",
+          "updated_at": "2026-10-03T02:32:11Z",
+          "browser_download_url": "https://github.com/rodrigojager/higgsfield-skill-runtime/releases/download/v3.40.0-rodrigo.1/higgsfield-runtime-3.40.0-rodrigo.1.zip",
+          "archive_path": "archive/higgsfield-skill-runtime/releases/402283959/higgsfield-runtime-3.40.0-rodrigo.1.zip",
+          "archive_sha256": "d85cca596329471dd6e5b38b19f07f90770e152e83d5be7ac7fd304a1df27cd7"
+        }
+      ],
+      "tarball_url": "https://api.github.com/repos/rodrigojager/higgsfield-skill-runtime/tarball/v3.40.0-rodrigo.1",
+      "zipball_url": "https://api.github.com/repos/rodrigojager/higgsfield-skill-runtime/zipball/v3.40.0-rodrigo.1",
+      "body": "Reduced English runtime for Pi's `higgsfield-specialist`: 120 files, preserving all 36 skills, production references/templates, dated service schemas, operational memory, and delivery preflight helpers.\n\nRemoved 106 files, approximately 61% of the installed byte size: skill-development tests and fixtures, evaluations, CI, Claude-specific configuration, archives, PDF tooling/fonts, older catalog snapshots, and unused scaffolding. Production parameter/prompt checks remain. The complete upstream package is not preserved in this repository.\n\nChanges, upstream MIT attribution, and delivery-check evidence are documented in [CHANGES.md](https://github.com/rodrigojager/higgsfield-skill-runtime/blob/main/CHANGES.md). The ZIP contains only the reduced `higgsfield/` runtime folder, matching the installed global copy under `~/.agents/skills/higgsfield`.\n\nThe main and delegated Pi profile both resolve all 36 skills. No paid service generation was performed during this reduction. Service sign-in is still required before production.\n"
+    }
+  ],
+  "issues": [],
+  "pull_requests": []
+}

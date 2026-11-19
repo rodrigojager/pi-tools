@@ -1,0 +1,38 @@
+{
+  "repository": {
+    "id": 1375857125,
+    "full_name": "rodrigojager/pi-codex-account-pool",
+    "html_url": "https://github.com/rodrigojager/pi-codex-account-pool",
+    "description": "Multi-account ChatGPT OAuth pool for Pi Codex sessions",
+    "visibility": "public",
+    "default_branch": "master",
+    "fork": false,
+    "forks_count": 0,
+    "archived": false,
+    "created_at": "2026-09-18T12:44:55Z",
+    "pushed_at": "2026-10-05T18:09:17Z",
+    "license": {
+      "key": "mit",
+      "name": "MIT License",
+      "spdx_id": "MIT",
+      "url": "https://api.github.com/licenses/mit",
+      "node_id": "MDc6TGljZW5zZTEz"
+    },
+    "topics": []
+  },
+  "default_commit": "1a7d69a499983f6926f97af325cffe6166be2087",
+  "default_tree": "380f27597f521321964cda736a4cbc1fc7caf1d5",
+  "git_refs": {
+    "refs/heads/master": {
+      "sha": "1a7d69a499983f6926f97af325cffe6166be2087",
+      "archive_ref": "refs/heads/archive/pi-codex-account-pool/master"
+    },
+    "refs/tags/v0.2.1": {
+      "sha": "a2622055312bbc30fd865a765a45001e6fd39700",
+      "archive_ref": "refs/tags/archive/pi-codex-account-pool/v0.2.1"
+    }
+  },
+  "releases": [],
+  "issues": [],
+  "pull_requests": []
+}

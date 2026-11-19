@@ -1,0 +1,598 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { visibleWidth } from "@earendil-works/pi-tui";
+import type { SidebarContext, TodoItem, WorkspaceFile } from "../types.ts";
+import { renderSessionPanel, estimateCtxLeft } from "../panels/session.ts";
+import { thinkingColorName, spinnerFrameAt, SPINNER_FRAMES } from "../colors.ts";
+import { renderTodosPanel, selectTodosToShow } from "../panels/todos.ts";
+import { renderWorkspacePanel } from "../panels/workspace.ts";
+
+function strip(s: string): string {
+  return s.replace(/\x1b\[[0-9;]*m/g, "");
+}
+
+function makeCtx(overrides: Partial<SidebarContext> = {}): SidebarContext {
+  return {
+    sessionTitle: null,
+    sessionId: null,
+    todos: [],
+    todosMax: 5,
+    branch: "main",
+    aheadCount: 0,
+    untrackedCount: 0,
+    workspaceFiles: [],
+    cwd: "/tmp/test",
+    model: null,
+    thinkingLevel: null,
+    contextTokens: null,
+    contextPercent: null,
+    contextWindow: null,
+    tokensIn: 0,
+    tokensOut: 0,
+    cacheRead: 0,
+    cacheWrite: 0,
+    sessionCost: 0,
+    turnCount: 0,
+    activeTool: null,
+    autoCompactEnabled: null,
+    sessionStartMs: Date.now(),
+    mcpServers: [],
+    modelProvider: null,
+    liveTps: null,
+    lastTps: null,
+    lastTurnMs: null,
+    agentActive: false,
+    spinnerFrame: 0,
+    ctxSamples: [],
+    ...overrides,
+  };
+}
+
+test("rpiv task details render and respect narrow terminal widths", () => {
+  const ctx = makeCtx({ todos: [{ id: "2", content: "Parser", status: "in_progress", subAction: "Editing", owner: "review", blockedBy: ["1"] }] });
+  const rendered = renderTodosPanel(ctx, 80).map(strip).join("\n");
+  assert.match(rendered, /Parser/);
+  assert.match(rendered, /Editing/);
+  assert.match(rendered, /review/);
+  assert.match(rendered, /#1/);
+  for (const width of [10, 20, 45]) {
+    for (const line of renderTodosPanel(ctx, width)) assert.ok(visibleWidth(line) <= width);
+  }
+});
+
+// ─── Session panel ────────────────────────────────────────────────────────────
+
+test("session panel: no title shows placeholder", () => {
+  const ctx = makeCtx({ sessionTitle: null });
+  const lines = renderSessionPanel(ctx, 40);
+  const text = lines.map(strip).join("\n");
+  assert.ok(text.includes("waiting for first message"), `missing placeholder, got: ${text}`);
+});
+
+test("session panel: title appears in output", () => {
+  const ctx = makeCtx({ sessionTitle: "Fix the auth bug" });
+  const lines = renderSessionPanel(ctx, 40);
+  const text = lines.map(strip).join("\n");
+  assert.ok(text.includes("Fix the auth bug"), `title missing, got: ${text}`);
+});
+
+test("session panel: title truncated when wider than width-2", () => {
+  const ctx = makeCtx({ sessionTitle: "a".repeat(100) });
+  const lines = renderSessionPanel(ctx, 20);
+  for (const line of lines) {
+    assert.ok(visibleWidth(strip(line)) <= 20, `line too wide: "${strip(line)}"`);
+  }
+  const titleLine = lines
+    .map(strip)
+    .find(l => l.trim().length > 0 && !l.includes("Session") && !l.includes("─"));
+  assert.ok(titleLine !== undefined, "no title line found");
+  assert.ok(titleLine.includes("…"), `title not truncated: "${titleLine}"`);
+});
+
+test("session panel: header line contains 'Session'", () => {
+  const ctx = makeCtx({});
+  const lines = renderSessionPanel(ctx, 40);
+  assert.ok(lines.map(strip).some(l => l.includes("Session")));
+});
+
+// ─── Session panel: context bar ───────────────────────────────────────────────
+
+test("session panel: context renders as fill bar with rounded pct label", () => {
+  const ctx = makeCtx({ contextPercent: 40, contextTokens: 80000, contextWindow: 200000 });
+  const text = renderSessionPanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("█"), `missing fill bar, got: ${text}`);
+  assert.ok(text.includes("40%"), `missing rounded pct label, got: ${text}`);
+});
+
+test("session panel: context detail line shows token counts + unit", () => {
+  const ctx = makeCtx({ contextPercent: 40, contextTokens: 80000, contextWindow: 200000 });
+  const text = renderSessionPanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("80k/200k"), `missing token counts, got: ${text}`);
+  assert.ok(text.includes("tkns"), `missing 'tkns' unit, got: ${text}`);
+});
+
+test("session panel: context detail line includes compact auto status when enabled", () => {
+  const ctx = makeCtx({ contextPercent: 40, contextTokens: 80000, contextWindow: 200000, autoCompactEnabled: true });
+  const text = renderSessionPanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("80k/200k tkns - compact auto"), `missing compact auto status, got: ${text}`);
+});
+
+test("session panel: compact auto status fits within width 40", () => {
+  const ctx = makeCtx({ contextPercent: 40, contextTokens: 80000, contextWindow: 200000, autoCompactEnabled: true });
+  const lines = renderSessionPanel(ctx, 40);
+  for (const line of lines) {
+    assert.ok(visibleWidth(strip(line)) <= 40, `line too wide: "${strip(line)}"`);
+  }
+  const text = lines.map(strip).join("\n");
+  assert.ok(text.includes("- compact auto"), `missing compact auto status, got: ${text}`);
+});
+
+test("session panel: no compact auto suffix when disabled", () => {
+  const ctx = makeCtx({ contextPercent: 40, contextTokens: 80000, contextWindow: 200000, autoCompactEnabled: false });
+  const text = renderSessionPanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("80k/200k tkns"), `missing token counts, got: ${text}`);
+  assert.ok(!text.includes("compact auto"), `should omit compact auto when disabled, got: ${text}`);
+});
+
+test("session panel: context bar fits within width at high usage", () => {
+  const ctx = makeCtx({ contextPercent: 95, contextTokens: 190000, contextWindow: 200000 });
+  const lines = renderSessionPanel(ctx, 30);
+  for (const line of lines) {
+    assert.ok(visibleWidth(strip(line)) <= 30, `line too wide: "${strip(line)}"`);
+  }
+});
+
+test("session panel: context bar leaves 2 cols clear on the right", () => {
+  const ctx = makeCtx({ contextPercent: 95, contextTokens: 190000, contextWindow: 200000 });
+  const barLine = renderSessionPanel(ctx, 40).map(strip).find(l => l.includes("█"));
+  assert.ok(barLine !== undefined, "no bar line found");
+  assert.equal(visibleWidth(barLine), 38, `bar line should leave 2 cols clear, got width ${visibleWidth(barLine)}`);
+});
+
+test("session panel: no bar when context data absent", () => {
+  const text = renderSessionPanel(makeCtx({}), 40).map(strip).join("\n");
+  assert.ok(!text.includes("█"), `bar should not render without context, got: ${text}`);
+});
+
+test("thinkingColorName maps level to pi theme token", () => {
+  assert.equal(thinkingColorName("off"), "thinkingOff");
+  assert.equal(thinkingColorName("minimal"), "thinkingMinimal");
+  assert.equal(thinkingColorName("low"), "thinkingLow");
+  assert.equal(thinkingColorName("medium"), "thinkingMedium");
+  assert.equal(thinkingColorName("high"), "thinkingHigh");
+  assert.equal(thinkingColorName("xhigh"), "thinkingXhigh");
+  assert.equal(thinkingColorName("max"), "thinkingMax");
+});
+
+test("session panel: model line shows thinking level word", () => {
+  const text = renderSessionPanel(makeCtx({ model: "claude", thinkingLevel: "high" }), 40).map(strip).join("\n");
+  assert.ok(text.includes("high"), `missing thinking level, got: ${text}`);
+});
+
+test("session panel: model line shows 'think off' when level off", () => {
+  const text = renderSessionPanel(makeCtx({ model: "claude", thinkingLevel: "off" }), 40).map(strip).join("\n");
+  assert.ok(text.includes("think off"), `missing think off, got: ${text}`);
+});
+
+function modelLine(ctx: SidebarContext): string {
+  return renderSessionPanel(ctx, 40).map(strip).find(l => l.includes("model") && !l.includes("─"))!;
+}
+
+test("spinnerFrameAt wraps modulo frames", () => {
+  assert.equal(spinnerFrameAt(0), SPINNER_FRAMES[0]);
+  assert.equal(spinnerFrameAt(SPINNER_FRAMES.length), SPINNER_FRAMES[0]);
+  assert.notEqual(spinnerFrameAt(0), spinnerFrameAt(1));
+});
+
+test("session panel: model line shows spinner glyph when agent active", () => {
+  const line = modelLine(makeCtx({ model: "claude", agentActive: true, spinnerFrame: 3 }));
+  assert.ok(line.includes(SPINNER_FRAMES[3]!), `expected spinner ${SPINNER_FRAMES[3]}, got: ${line}`);
+});
+
+test("session panel: model line shows idle dot when agent not active", () => {
+  const line = modelLine(makeCtx({ model: "claude", agentActive: false, spinnerFrame: 0 }));
+  assert.ok(line.includes("·"), `expected idle dot, got: ${line}`);
+});
+
+function rawModelLine(ctx: SidebarContext): string {
+  return renderSessionPanel(ctx, 40).find(l => strip(l).includes("model") && !strip(l).includes("─"))!;
+}
+
+function sgrCodeBefore(line: string, glyph: string): string | null {
+  const i = line.indexOf(glyph);
+  if (i === -1) return null;
+  return /\x1b\[([0-9;]*)m$/.exec(line.slice(0, i))?.[1] ?? null;
+}
+
+test("session panel: active spinner uses high thinking-level color", () => {
+  const line = rawModelLine(makeCtx({ model: "claude", agentActive: true, spinnerFrame: 0, thinkingLevel: "high" }));
+  assert.equal(sgrCodeBefore(line, SPINNER_FRAMES[0]!), "38;2;178;148;187", `wrong spinner color, got: ${line}`);
+});
+
+test("session panel: active spinner uses off thinking-level color", () => {
+  const line = rawModelLine(makeCtx({ model: "claude", agentActive: true, spinnerFrame: 0, thinkingLevel: "off" }));
+  assert.equal(sgrCodeBefore(line, SPINNER_FRAMES[0]!), "38;2;85;85;85", `wrong spinner color, got: ${line}`);
+});
+
+test("session panel: active spinner falls back to accent when thinking level unknown", () => {
+  const line = rawModelLine(makeCtx({ model: "claude", agentActive: true, spinnerFrame: 0, thinkingLevel: null }));
+  assert.equal(sgrCodeBefore(line, SPINNER_FRAMES[0]!), "38;2;254;188;56", `wrong spinner color, got: ${line}`);
+});
+
+// ─── Session panel: context estimate ──────────────────────────────────────────
+
+const S = (tokens: number, turns: number) => ({ tokens, turns });
+
+test("estimateCtxLeft: unknown with fewer than 2 samples", () => {
+  assert.deepEqual(estimateCtxLeft([], 100000, 200000), { kind: "unknown" });
+  assert.deepEqual(estimateCtxLeft([S(100, 1)], 100000, 200000), { kind: "unknown" });
+});
+
+test("estimateCtxLeft: unknown when turn count does not advance", () => {
+  assert.deepEqual(estimateCtxLeft([S(100, 5), S(200, 5)], 100000, 200000), { kind: "unknown" });
+});
+
+test("estimateCtxLeft: unknown without context data", () => {
+  assert.deepEqual(estimateCtxLeft([S(100, 1), S(200, 2)], null, 200000), { kind: "unknown" });
+  assert.deepEqual(estimateCtxLeft([S(100, 1), S(200, 2)], 100000, null), { kind: "unknown" });
+});
+
+test("estimateCtxLeft: stable when context not growing", () => {
+  assert.deepEqual(estimateCtxLeft([S(100, 1), S(100, 5)], 100000, 200000), { kind: "stable" });
+  assert.deepEqual(estimateCtxLeft([S(200, 1), S(100, 5)], 100000, 200000), { kind: "stable" });
+});
+
+test("estimateCtxLeft: computes turns remaining from recent pace", () => {
+  // pace: (400-200)/(4-2) = 100 tokens/turn; remaining 50000 → 500 turns
+  assert.deepEqual(estimateCtxLeft([S(200, 2), S(400, 4)], 150000, 200000), { kind: "left", turns: 500 });
+});
+
+test("estimateCtxLeft: pace from first/last of buffer, middle noise ignored", () => {
+  // pace: (300-100)/(3-0) = 66.7/turn; remaining 100000 → 1500
+  const r = estimateCtxLeft([S(100, 0), S(5000, 1), S(150, 2), S(300, 3)], 100000, 200000);
+  assert.deepEqual(r, { kind: "left", turns: 1500 });
+});
+
+test("estimateCtxLeft: full window yields 0 turns left", () => {
+  assert.deepEqual(estimateCtxLeft([S(100, 1), S(300, 2)], 200000, 200000), { kind: "left", turns: 0 });
+});
+
+// ─── Session panel: left / cost rows ─────────────────────────────────────────
+
+// Fallback hex codes (no pi theme in tests): muted=#6c6c6c accent=#febc38 warning=#ff9500
+const HEX_MUTED = "38;2;108;108;108";
+const HEX_ACCENT = "38;2;254;188;56";
+const HEX_WARNING = "38;2;255;149;0";
+
+function leftRow(ctx: SidebarContext, width = 40): { raw: string; text: string } | undefined {
+  const lines = renderSessionPanel(ctx, width);
+  const i = lines.findIndex(l => strip(l).includes("left"));
+  return i === -1 ? undefined : { raw: lines[i], text: strip(lines[i]) };
+}
+
+function makeCtxEst(overrides: Partial<SidebarContext> = {}): SidebarContext {
+  return makeCtx({
+    contextTokens: 190000,
+    contextWindow: 200000,
+    contextPercent: 95,
+    turnCount: 2,
+    tokensIn: 1000,
+    cacheRead: 870,
+    sessionCost: 1.234,
+    ctxSamples: [S(187500, 1), S(190000, 2)], // pace 2500/turn, remaining 10000 → 4 turns
+    ...overrides,
+  });
+}
+
+test("session panel: left row shows estimated turns with ≈Nt value", () => {
+  const row = leftRow(makeCtxEst());
+  assert.ok(row, "no left row found");
+  assert.ok(row!.text.includes("≈4t"), `expected ≈4t, got: "${row!.text}"`);
+});
+
+test("session panel: left row value is warning red when < 5 turns", () => {
+  const row = leftRow(makeCtxEst());
+  assert.ok(row, "no left row found");
+  assert.ok(row!.raw.includes(HEX_WARNING), `expected warning color, got: "${row!.raw}"`);
+});
+
+test("session panel: left row value is accent when 5-19 turns", () => {
+  // pace 625/turn → remaining 10000 → 16 turns
+  const row = leftRow(makeCtxEst({ ctxSamples: [S(100000, 0), S(100625, 1)] }));
+  assert.ok(row, "no left row found");
+  assert.ok(row!.text.includes("≈16t"), `expected ≈16t, got: "${row!.text}"`);
+  assert.ok(row!.raw.includes(HEX_ACCENT), `expected accent color, got: "${row!.raw}"`);
+});
+
+test("session panel: left row value is muted when >= 20 turns", () => {
+  // pace 250/turn → remaining 10000 → 40 turns
+  const row = leftRow(makeCtxEst({ ctxSamples: [S(100000, 0), S(100250, 1)] }));
+  assert.ok(row, "no left row found");
+  assert.ok(row!.text.includes("≈40t"), `expected ≈40t, got: "${row!.text}"`);
+  assert.ok(row!.raw.includes(HEX_MUTED), `expected muted color, got: "${row!.raw}"`);
+});
+
+test("session panel: left row shows NA when no samples", () => {
+  const row = leftRow(makeCtxEst({ ctxSamples: [] }));
+  assert.ok(row, "no left row found");
+  assert.ok(row!.text.includes("—"), `expected NA, got: "${row!.text}"`);
+});
+
+test("session panel: left row shows infinity when pace flat", () => {
+  const row = leftRow(makeCtxEst({ ctxSamples: [S(100000, 1), S(100000, 5)] }));
+  assert.ok(row, "no left row found");
+  assert.ok(row!.text.includes("∞"), `expected ∞, got: "${row!.text}"`);
+});
+
+test("session panel: cost row sits under cache row (col2 order)", () => {
+  const lines = renderSessionPanel(makeCtxEst(), 40).map(strip);
+  const cacheIdx = lines.findIndex(l => l.includes("cache"));
+  const costIdx = lines.findIndex(l => l.includes("cost"));
+  assert.ok(cacheIdx !== -1 && costIdx !== -1, "cache/cost rows missing");
+  assert.ok(costIdx > cacheIdx, `expected cost under cache (cache=${cacheIdx}, cost=${costIdx})`);
+  const costLine = lines[costIdx];
+  assert.ok(costLine.includes("$1.234"), `cost value missing, got: "${costLine}"`);
+});
+
+test("session panel: left row sits under turns row (col1 order)", () => {
+  const lines = renderSessionPanel(makeCtxEst(), 40).map(strip);
+  const turnsIdx = lines.findIndex(l => l.includes("turns"));
+  const leftIdx = lines.findIndex(l => l.includes("left"));
+  assert.ok(turnsIdx !== -1 && leftIdx !== -1, "turns/left rows missing");
+  assert.ok(leftIdx > turnsIdx, `expected left under turns (turns=${turnsIdx}, left=${leftIdx})`);
+});
+
+// ─── Session panel: context bar color (by usage %) ──────────────────────────
+
+function barLine(ctx: SidebarContext, width = 40): string | undefined {
+  return renderSessionPanel(ctx, width).find(l => strip(l).includes("█"));
+}
+
+const HEX_SUCCESS = "38;2;95;175;95";
+const HEX_ERROR = "38;2;224;85;97";
+
+test("ctx bar: green (success) below 50%", () => {
+  const bar = barLine(makeCtx({ contextPercent: 30 }));
+  assert.ok(bar, "no bar line");
+  assert.ok(bar!.includes(HEX_SUCCESS), `expected green bar, got: "${bar}"`);
+});
+
+test("ctx bar: yellow (accent) between 50% and 80%", () => {
+  const bar = barLine(makeCtx({ contextPercent: 65 }));
+  assert.ok(bar, "no bar line");
+  assert.ok(bar!.includes(HEX_ACCENT), `expected yellow bar, got: "${bar}"`);
+});
+
+test("ctx bar: red (error) above 80%", () => {
+  const bar = barLine(makeCtx({ contextPercent: 90 }));
+  assert.ok(bar, "no bar line");
+  assert.ok(bar!.includes(HEX_ERROR), `expected red bar, got: "${bar}"`);
+});
+
+test("ctx bar: boundaries — 49 green, 50 yellow, 80 yellow, 81 red", () => {
+  assert.ok(barLine(makeCtx({ contextPercent: 49 }))!.includes(HEX_SUCCESS), "49 should be green");
+  assert.ok(barLine(makeCtx({ contextPercent: 50 }))!.includes(HEX_ACCENT), "50 should be yellow");
+  assert.ok(barLine(makeCtx({ contextPercent: 80 }))!.includes(HEX_ACCENT), "80 should be yellow");
+  assert.ok(barLine(makeCtx({ contextPercent: 81 }))!.includes(HEX_ERROR), "81 should be red");
+});
+
+test("session panel: left row fits width at narrow sidebar", () => {
+  const ctx = makeCtxEst();
+  const lines = renderSessionPanel(ctx, 30);
+  for (const line of lines) {
+    assert.ok(visibleWidth(strip(line)) <= 30, `line too wide: "${strip(line)}"`);
+  }
+});
+
+// ─── Todos panel ─────────────────────────────────────────────────────────────
+
+test("todos panel: empty shows (no todos)", () => {
+  const lines = renderTodosPanel(makeCtx({ todos: [] }), 40);
+  assert.ok(lines.map(strip).join("\n").includes("no todos"));
+});
+
+test("todos panel: empty reserves header + 7 rows", () => {
+  const lines = renderTodosPanel(makeCtx({ todos: [] }), 40);
+  assert.equal(lines.length, 9, `expected 9 rows (2 header + 7), got ${lines.length}`);
+});
+
+test("todos panel: few todos padded to 7 content rows", () => {
+  const lines = renderTodosPanel(makeCtx({ todos: mkTodos(3) }), 40);
+  assert.equal(lines.length, 9, `expected 9 rows, got ${lines.length}`);
+});
+
+test("todos panel: grows beyond reserved when cap + footer exceeds 7", () => {
+  const lines = renderTodosPanel(makeCtx({ todos: mkTodos(12), todosMax: 10 }), 40);
+  assert.equal(lines.length, 13, `expected 13 rows (2 header + 10 todos + footer), got ${lines.length}`);
+  assert.ok(lines.map(strip).join("\n").includes("+2 more"), `expected +2 more footer`);
+});
+
+test("todos panel: header count is done/total", () => {
+  const ctx = makeCtx({
+    todos: [
+      { id: "1", content: "done", status: "completed" },
+      { id: "2", content: "active", status: "in_progress" },
+      { id: "3", content: "pending", status: "pending" },
+    ],
+  });
+  const header = strip(renderTodosPanel(ctx, 40)[0]);
+  assert.ok(header.includes("1/3"), `expected "1/3" in header, got: "${header}"`);
+});
+
+test("todos panel: all pending count is 0/N", () => {
+  const ctx = makeCtx({
+    todos: [
+      { id: "1", content: "a", status: "pending" },
+      { id: "2", content: "b", status: "pending" },
+    ],
+  });
+  const header = strip(renderTodosPanel(ctx, 40)[0]);
+  assert.ok(header.includes("0/2"), `expected "0/2", got: "${header}"`);
+});
+
+test("todos panel: correct glyphs for each status", () => {
+  const ctx = makeCtx({
+    todos: [
+      { id: "1", content: "done", status: "completed" },
+      { id: "2", content: "active", status: "in_progress" },
+      { id: "3", content: "pending", status: "pending" },
+    ],
+  });
+  const text = renderTodosPanel(ctx, 60).map(strip).join("\n");
+  assert.ok(text.includes("✓"), "missing ✓ for completed");
+  assert.ok(text.includes("◐"), "missing ◐ for in_progress");
+  assert.ok(text.includes("○"), "missing ○ for pending");
+});
+
+test("todos panel: in-progress shows sub-action parenthetical", () => {
+  const ctx = makeCtx({
+    todos: [
+      { id: "1", content: "my task", status: "in_progress", subAction: "running subtask" },
+    ],
+  });
+  const text = renderTodosPanel(ctx, 60).map(strip).join("\n");
+  assert.ok(text.includes("running subtask"), `sub-action missing, got: ${text}`);
+});
+
+test("todos panel: no line exceeds width", () => {
+  const ctx = makeCtx({
+    todos: [{ id: "1", content: "a".repeat(100), status: "pending" }],
+  });
+  const lines = renderTodosPanel(ctx, 20);
+  for (const line of lines) {
+    assert.ok(visibleWidth(strip(line)) <= 20, `line too wide: "${strip(line)}"`);
+  }
+});
+
+test("todos panel: todo lines indented 1 space from side border", () => {
+  const ctx = makeCtx({ todos: [{ id: "1", content: "Task A", status: "pending" }] });
+  const s = strip(renderTodosPanel(ctx, 40).find((l) => strip(l).includes("Task A"))!);
+  assert.ok(s.startsWith(" ") && !s.startsWith("  "), `todo line indent != 1: "${s}"`);
+});
+
+function mkTodos(n: number): TodoItem[] {
+  return Array.from({ length: n }, (_, i) => ({ id: `t${i + 1}`, content: `task ${i + 1}`, status: "pending" as const }));
+}
+
+test("selectTodosToShow: returns all when under/at cap", () => {
+  const t = mkTodos(3);
+  assert.deepEqual(selectTodosToShow(t, 5), t);
+  assert.deepEqual(selectTodosToShow(mkTodos(5), 5), mkTodos(5));
+});
+
+test("selectTodosToShow: all pending -> most recent N", () => {
+  const t = mkTodos(8);
+  assert.deepEqual(selectTodosToShow(t, 5), t.slice(3));
+});
+
+test("selectTodosToShow: in-progress first, then most recent", () => {
+  const t: TodoItem[] = [
+    { id: "1", content: "a", status: "pending" },
+    { id: "2", content: "b", status: "pending" },
+    { id: "3", content: "c", status: "in_progress" },
+    { id: "4", content: "d", status: "pending" },
+    { id: "5", content: "e", status: "pending" },
+    { id: "6", content: "f", status: "pending" },
+    { id: "7", content: "g", status: "pending" },
+  ];
+  assert.deepEqual(selectTodosToShow(t, 3).map(x => x.id), ["3", "6", "7"]);
+});
+
+test("todos panel: caps to todosMax with '+N more' footer", () => {
+  const text = renderTodosPanel(makeCtx({ todos: mkTodos(8), todosMax: 5 }), 40).map(strip).join("\n");
+  assert.ok(text.includes("task 8"), `expected most recent, got: ${text}`);
+  assert.ok(!text.includes("task 3"), `task 3 should be hidden, got: ${text}`);
+  assert.ok(text.includes("+3 more"), `expected +3 more footer, got: ${text}`);
+});
+
+test("todos panel: in-progress floated to top within cap", () => {
+  const todos: TodoItem[] = [
+    { id: "1", content: "old-pending", status: "pending" },
+    { id: "2", content: "the-active", status: "in_progress" },
+    { id: "3", content: "recent-1", status: "pending" },
+    { id: "4", content: "recent-2", status: "pending" },
+    { id: "5", content: "recent-3", status: "pending" },
+    { id: "6", content: "recent-4", status: "pending" },
+  ];
+  const lines = renderTodosPanel(makeCtx({ todos, todosMax: 3 }), 40).map(strip);
+  const shown = lines.filter(l => /the-active|recent-/.test(l));
+  assert.equal(shown.length, 3, `expected 3 shown, got: ${lines.join("|")}`);
+  assert.ok(shown[0].includes("the-active"), `in-progress should be first, got: ${shown[0]}`);
+});
+
+test("todos panel: no footer under cap", () => {
+  const text = renderTodosPanel(makeCtx({ todos: mkTodos(3), todosMax: 5 }), 40).map(strip).join("\n");
+  assert.ok(text.includes("task 1"), `expected task 1, got: ${text}`);
+  assert.ok(!text.includes("more"), `no footer expected, got: ${text}`);
+});
+
+// ─── Workspace panel ──────────────────────────────────────────────────────────
+
+test("workspace panel: no git repo shows message", () => {
+  const ctx = makeCtx({ branch: null, workspaceFiles: [] });
+  const text = renderWorkspacePanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("not a git repo"), `got: ${text}`);
+});
+
+test("workspace panel: clean repo shows (clean)", () => {
+  const ctx = makeCtx({ branch: "main", workspaceFiles: [] });
+  const text = renderWorkspacePanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("clean"), `got: ${text}`);
+});
+
+test("workspace panel: additions-only shows +N not -0", () => {
+  const ctx = makeCtx({
+    branch: "main",
+    workspaceFiles: [{ path: "src/foo.ts", added: 29, removed: 0 }],
+  });
+  const text = renderWorkspacePanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("+29"), `missing +29, got: ${text}`);
+  assert.ok(!text.includes("-0"), `unexpected -0, got: ${text}`);
+});
+
+test("workspace panel: additions and deletions shows +N -M", () => {
+  const ctx = makeCtx({
+    branch: "main",
+    workspaceFiles: [{ path: "src/bar.ts", added: 12, removed: 3 }],
+  });
+  const text = renderWorkspacePanel(ctx, 40).map(strip).join("\n");
+  assert.ok(text.includes("+12"), `missing +12, got: ${text}`);
+  assert.ok(text.includes("-3"), `missing -3, got: ${text}`);
+});
+
+test("workspace panel: 16 files capped to 15", () => {
+  const files: WorkspaceFile[] = Array.from({ length: 16 }, (_, i) => ({
+    path: `src/file${i}.ts`,
+    added: 1,
+    removed: 0,
+  }));
+  const ctx = makeCtx({ branch: "main", workspaceFiles: files });
+  const lines = renderWorkspacePanel(ctx, 50);
+  const fileLines = lines.filter(l => strip(l).includes("src/file"));
+  assert.equal(fileLines.length, 15, `expected 15 file lines, got ${fileLines.length}`);
+});
+
+test("workspace panel: header contains branch name", () => {
+  const ctx = makeCtx({ branch: "feature/my-branch", workspaceFiles: [] });
+  const header = strip(renderWorkspacePanel(ctx, 60)[0]);
+  assert.ok(header.includes("feature/my-branch"), `branch missing from header: "${header}"`);
+});
+
+test("workspace panel: no line exceeds width", () => {
+  const ctx = makeCtx({
+    branch: "very-long-branch-name-that-is-quite-wordy",
+    aheadCount: 99,
+    untrackedCount: 99,
+    workspaceFiles: [{ path: "src/" + "a".repeat(80) + ".ts", added: 999, removed: 999 }],
+  });
+  const lines = renderWorkspacePanel(ctx, 30);
+  for (const line of lines) {
+    assert.ok(visibleWidth(strip(line)) <= 30, `line too wide: "${strip(line)}"`);
+  }
+});
+
+test("workspace panel: file lines indented 1 space from side border", () => {
+  const ctx = makeCtx({ branch: "main", workspaceFiles: [{ path: "src/foo.ts", added: 5, removed: 0 }] });
+  const s = strip(renderWorkspacePanel(ctx, 40).find((l) => strip(l).includes("src/foo.ts"))!);
+  assert.ok(s.startsWith(" ") && !s.startsWith("  "), `file line indent != 1: "${s}"`);
+});
